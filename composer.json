@@ -1,0 +1,34 @@
+{
+    "name": "lightwerk/surftasks",
+    "type": "typo3-flow-package",
+    "description": "Additional tasks for TYPO3.Surf.",
+    "license": "GPL-3.0+",
+    "homepage": "https://bitbucket.org/lightwerk/surftasks",
+    "keywords": [
+        "TYPO3 Surf",
+        "Deployment",
+        "Tasks"
+    ],
+    "authors": [
+        {
+            "name": "Daniel Goerz",
+            "role": "Developer"
+        },
+        {
+            "name": "Achim Fritz",
+            "role": "Developer"
+        },
+        {
+            "name": "Lars Malach",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "typo3/surf": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Lightwerk\\SurfTasks": "Classes"
+        }
+    }
+}
