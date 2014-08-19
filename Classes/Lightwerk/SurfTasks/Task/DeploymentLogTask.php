@@ -53,7 +53,7 @@ class DeploymentLogTask extends \TYPO3\Surf\Domain\Model\Task {
 
 		$commands = array(
 			'cd ' . escapeshellarg($releasePath),
-			'echo ' . escapeshellarg(implode(' | ', $logContent)) . ' >> ' . rtrim($targetPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName
+			'echo ' . escapeshellarg(implode(' | ', $logContent)) . ' >> ' . rtrim($targetPath, '/') . '/' . $fileName
 		);
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
