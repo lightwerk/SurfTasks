@@ -35,8 +35,9 @@ class DeploymentLogTask extends \TYPO3\Surf\Domain\Model\Task {
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$releasePath = $deployment->getApplicationReleasePath($application);
 
-		$targetPath = isset($options['deploymentLogTargetPath']) ? $options['deploymentLogTargetPath'] : $releasePath;
-		$fileName = isset($options['deploymentLogFileName']) ? $options['deploymentLogFileName'] : 'deployment.log';
+		$targetPath = isset($options['deploymentLogTargetPath']) ? $options['deploymentLogTargetPath'] : '.';
+		$fileName = !empty($options['deploymentLogFileName']) ? $options['deploymentLogFileName'] : 'deployment.log';
+		$optionsToLog = !empty($options['deploymentLogOptions']) ? $options['deploymentLogOptions'] : array('repositoryUrl', 'tag', 'branch', 'sha1');
 
 		$logContent = array(
 			date('Y-m-d H:i:s (D)'),
@@ -44,7 +45,6 @@ class DeploymentLogTask extends \TYPO3\Surf\Domain\Model\Task {
 			'Deployment: ' . $deployment->getName()
 		);
 
-		$optionsToLog = array('repositoryUrl', 'tag', 'branch', 'sha1');
 		foreach ($optionsToLog as $key) {
 			if (!empty($options[$key])) {
 				$logContent[] = $key . ' = ' . $options[$key];
@@ -53,7 +53,7 @@ class DeploymentLogTask extends \TYPO3\Surf\Domain\Model\Task {
 
 		$commands = array(
 			'cd ' . escapeshellarg($releasePath),
-			'echo ' . escapeshellarg(implode(' | ', $logContent)) . ' >> ' . $targetPath . DIRECTORY_SEPARATOR . $fileName
+			'echo ' . escapeshellarg(implode(' | ', $logContent)) . ' >> ' . rtrim($targetPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $fileName
 		);
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
