@@ -40,7 +40,7 @@ class TagNodeDeploymentTask extends \TYPO3\Surf\Domain\Model\Task {
 		}
 
 		$tagPrefix = isset($options['deploymentTagPrefix']) ? $options['deploymentTagPrefix'] : 'server-';
-		$tagName = $tagPrefix . preg_replace('/[^a-zA-Z0-9-_\.]*/', '', $node->getName());
+		$tagName = preg_replace('/[^a-zA-Z0-9-_\.]*/', '', $tagPrefix . $node->getName());
 
 		if (!empty($options['nodeName'])) {
 			$node = $deployment->getNode($options['nodeName']);
@@ -54,10 +54,8 @@ class TagNodeDeploymentTask extends \TYPO3\Surf\Domain\Model\Task {
 
 		$commands = array(
 			'cd ' . escapeshellarg($gitRootPath),
-			'git tag -d ' . $tagName,
-			'git push --delete origin refs/tags/' . $tagName,
-			'git tag ' . $tagName,
-			'git push --tags'
+			'git tag --force -- ' . escapeshellarg($tagName),
+			'git push --tags --force'
 		);
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
