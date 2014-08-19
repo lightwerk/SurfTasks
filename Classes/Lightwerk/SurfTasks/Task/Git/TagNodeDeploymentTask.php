@@ -54,7 +54,8 @@ class TagNodeDeploymentTask extends \TYPO3\Surf\Domain\Model\Task {
 
 		$commands = array(
 			'cd ' . escapeshellarg($gitRootPath),
-			'git push origin :' . $tagName,
+			'git tag -d ' . $tagName,
+			'git push --delete origin refs/tags/' . $tagName,
 			'git tag ' . $tagName,
 			'git push --tags'
 		);
