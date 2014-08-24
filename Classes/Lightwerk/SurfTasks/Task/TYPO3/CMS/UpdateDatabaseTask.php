@@ -45,10 +45,10 @@ class UpdateDatabaseTask extends \TYPO3\Surf\Domain\Model\Task {
 
 		$commands = array();
 		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-		if (!empty($options['TYPO3_CONTEXT'])) {
-			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['TYPO3_CONTEXT']);
+		if (!empty($options['context'])) {
+			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
 		}
-		$commands[] = 'typo3 /cli_dispatch.phpsh extbase databaseapi:databasecompare ' . escapeshellarg($actions);
+		$commands[] = 'typo3/cli_dispatch.phpsh extbase databaseapi:databasecompare ' . escapeshellarg($actions);
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}

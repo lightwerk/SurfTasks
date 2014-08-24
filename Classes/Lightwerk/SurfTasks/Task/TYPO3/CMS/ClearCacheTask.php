@@ -36,10 +36,10 @@ class ClearCacheTask extends \TYPO3\Surf\Domain\Model\Task {
 		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
 		$commands[] = 'rm -rf ' . escapeshellarg('typo3temp/Cache');
 		$commands[] = 'rm -rf ' . escapeshellarg('typo3conf/temp_*');
-		if (!empty($options['TYPO3_CONTEXT'])) {
-			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['TYPO3_CONTEXT']);
+		if (!empty($options['context'])) {
+			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
 		}
-		$commands[] = 'typo3 /cli_dispatch.phpsh extbase cacheapi:clearallcaches';
+		$commands[] = 'typo3/cli_dispatch.phpsh extbase cacheapi:clearallcaches';
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}

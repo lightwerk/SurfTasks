@@ -33,7 +33,7 @@ class DeploymentLogTask extends \TYPO3\Surf\Domain\Model\Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$releasePath = $deployment->getApplicationReleasePath($application);
+		$releasePath = $application->getReleasesPath();
 
 		$targetPath = isset($options['deploymentLogTargetPath']) ? $options['deploymentLogTargetPath'] : '.';
 		$fileName = !empty($options['deploymentLogFileName']) ? $options['deploymentLogFileName'] : 'deployment.log';

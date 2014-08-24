@@ -1,26 +1,34 @@
 <?php
-namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
+namespace Lightwerk\SurfTasks\Task\Transfer;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTasks".   *
  *                                                                        *
  *                                                                        */
 
+use Lightwerk\SurfTasks\Service\RsyncService;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Surf\Domain\Model\Task;
 
 /**
- * Create upload folder for all installed TYPO3 extensions
+ * Rsync
  */
-class CreateUploadFoldersTask extends \TYPO3\Surf\Domain\Model\Task {
+class RsyncTask extends Task {
 
 	/**
 	 * @Flow\Inject
 	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
 	 */
 	protected $shell;
+
+	/**
+	 * @Flow\Inject
+	 * @var RsyncService
+	 */
+	protected $rsyncService;
 
 	/**
 	 * Executes this task
@@ -32,13 +40,17 @@ class CreateUploadFoldersTask extends \TYPO3\Surf\Domain\Model\Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-		if (!empty($options['context'])) {
-			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
-		}
-		$commands[] = './typo3/cli_dispatch.phpsh extbase extensionapi:createuploadfolders';
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
+		$localhost = new Node('localhost');
+		$localhost->setHostname('localhost');
+		$this->rsyncService->sync(
+			$localhost, // $sourceNode
+			$deployment->getWorkspacePath($application), // $sourcePath
+			$node, // $destnationNode
+			$deployment->getApplicationReleasePath($application), // $destinationPath
+			$deployment,
+			$options
+		);
+		$deployment->getWorkspacePath($application);
 	}
 
 	/**
