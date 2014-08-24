@@ -37,12 +37,13 @@ class DeploymentLogTask extends \TYPO3\Surf\Domain\Model\Task {
 
 		$targetPath = isset($options['deploymentLogTargetPath']) ? $options['deploymentLogTargetPath'] : '.';
 		$fileName = !empty($options['deploymentLogFileName']) ? $options['deploymentLogFileName'] : 'deployment.log';
-		$optionsToLog = !empty($options['deploymentLogOptions']) ? $options['deploymentLogOptions'] : array('repositoryUrl', 'tag', 'branch', 'sha1');
+		$optionsToLog = !empty($options['deploymentLogOptions']) ? $options['deploymentLogOptions'] : array('tag', 'branch', 'sha1');
 
 		$logContent = array(
 			date('Y-m-d H:i:s (D)'),
 			'Application: ' . $application->getName(),
-			'Deployment: ' . $deployment->getName()
+			'Deployment: ' . $deployment->getName(),
+			'Status: ' . $deployment->getStatus(),
 		);
 
 		foreach ($optionsToLog as $key) {
