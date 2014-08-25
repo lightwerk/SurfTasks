@@ -6,16 +6,18 @@ namespace Lightwerk\SurfTasks\Task;
  *                                                                        *
  *                                                                        */
 
-use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
-
-use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Surf\Domain\Model\Task;
 
 /**
  * Writes a deployment log on target server
+ *
+ * @package Lightwerk\SurfTasks
  */
-class DeploymentLogTask extends \TYPO3\Surf\Domain\Model\Task {
+class DeploymentLogTask extends Task {
 
 	/**
 	 * @Flow\Inject

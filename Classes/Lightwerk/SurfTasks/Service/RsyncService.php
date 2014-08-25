@@ -2,18 +2,20 @@
 namespace Lightwerk\SurfTasks\Service;
 
 /*                                                                        *
- * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTaks".  *
+ * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTasks".   *
  *                                                                        *
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Log\LoggerInterface;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
+ * Rsync Service
+ *
  * @Flow\Scope("singleton")
+ * @package Lightwerk\SurfTasks
  */
 class RsyncService {
 
@@ -32,42 +34,44 @@ class RsyncService {
 	 * @var array
 	 */
 	protected $flags = array(
-		'recursive' => true,
-		'times' => true,
-		'perms' => true,
-		'links' => true,
-		'delete' => true,
-		'compress' => true,
-		'verbose' => true,
-		'quiet' => true,
+		'recursive' => TRUE,
+		'times' => TRUE,
+		'perms' => TRUE,
+		'links' => TRUE,
+		'delete' => TRUE,
+		'compress' => TRUE,
+		'verbose' => TRUE,
+		'quiet' => TRUE,
 		'rsh' => 'ssh -p 22'
 	);
 
 	/**
-	 * @param LoggerInterface $logger
-	 * @param boolean $dryRun
-	 * @return Deployment
+	 * @param Node $sourceNode
+	 * @param string $sourcePath
+	 * @param Node $destinationNode
+	 * @param string $destinationPath
+	 * @param Deployment $deployment
+	 * @param array $options
+	 * @return void
+	 * @throws \TYPO3\Surf\Exception\InvalidConfigurationException
 	 */
 	public function sync(Node $sourceNode, $sourcePath, Node $destinationNode, $destinationPath, Deployment $deployment, $options) {
 		$flagOptions = $this->flags;
 
-		if ($sourceNode->isLocalhost() === false && $destinationNode->isLocalhost()  === false) {
+		if ($sourceNode->isLocalhost() === FALSE && $destinationNode->isLocalhost()  === FALSE) {
 			throw new InvalidConfigurationException('Just one external host is allowed!', 1408805638);
 		}
 
-		$externalNode = NULL;
-		if ($sourceNode->isLocalhost() === false) {
-			$externalNode = $sourceNode;
-		} elseif ($destinationNode->isLocalhost() === false) {
-			$externalNode = $destinationNode;
-		}
+		$externalNode = $this->getFirstExternalNode($sourceNode, $destinationNode);
 		if ($externalNode instanceof Node && $externalNode->hasOption('port')) {
 			$flagOptions['rsh'] = 'ssh -p ' . (int) $externalNode->getOption('port');
 		}
 
-		if (empty($options['keepCvs']) && (empty($options['context']) || preg_match('/^Production.*/', $options['context']))) {
-			$flagOptions['exclude'][] = '.git';
-			$flagOptions['exclude'][] = '.svn';
+		if (!isset($options['keepVcs']) || empty($options['keepVcs'])) {
+			if (empty($options['context']) || !preg_match('/^Development.*/', $options['context'])) {
+				$flagOptions['exclude'][] = '.git';
+				$flagOptions['exclude'][] = '.svn';
+			}
 		}
 
 		$command = array_merge(array($this->rsyncCommand), $this->getFlags($options, $flagOptions));
@@ -80,13 +84,28 @@ class RsyncService {
 	}
 
 	/**
+	 * @param Node $node,... Nodes
+	 * @return null|Node
+	 */
+	protected function getFirstExternalNode($node) {
+		$nodes = func_get_args();
+		foreach ($nodes as $node) {
+			/** @var Node $node */
+			if ($node->isLocalhost() === FALSE) {
+				return $node;
+			}
+		}
+		return NULL;
+	}
+
+	/**
 	 * @param Node $node
 	 * @param string $path
 	 * @return string
 	 */
 	protected function getFullPath(Node $node, $path) {
 		$hostArgument = '';
-		if ($node->isLocalhost() === false) {
+		if ($node->isLocalhost() === FALSE) {
 			if ($node->hasOption('username')) {
 				$hostArgument .= $node->getOption('username') . '@';
 			}
@@ -97,33 +116,27 @@ class RsyncService {
 
 	/**
 	 * @param array $options
+	 * @param array $flagOptions
 	 * @return array
 	 */
 	protected function getFlags($options, $flagOptions) {
 		$flags = array();
 
-		if (isset($options['rsyncFlags'])) {
-			if (is_string($options['rsyncFlags'])) {
-				$flags[] = $options['rsyncFlags'];
-				$flagOptions = array();
-			} elseif (is_array($options['rsyncFlags'])) {
-				$flagOptions = array_merge($flags, $options['rsyncFlags']);
-			}
+		if (isset($options['rsyncFlags']) && is_array($options['rsyncFlags'])) {
+			$flagOptions = array_merge($flags, $options['rsyncFlags']);
 		}
 
-		if (!empty($flagOptions) && is_array($flagOptions)) {
-			foreach ($flagOptions as $key => $value) {
-				if (is_bool($value)) {
-					if ($value) {
-						$flags[] = '--' . $key;
-					}
-				} elseif (is_array($value)) {
-					foreach ($value as $subValue) {
-						$flags[] = '--' . $key . ' ' . escapeshellarg($subValue);
-					}
-				} elseif (is_string($value)) {
-					$flags[] = '--' . $key . ' ' . escapeshellarg($value);
+		foreach ($flagOptions as $key => $value) {
+			if (is_bool($value)) {
+				if ($value) {
+					$flags[] = '--' . $key;
 				}
+			} elseif (is_array($value)) {
+				foreach ($value as $subValue) {
+					$flags[] = '--' . $key . ' ' . escapeshellarg($subValue);
+				}
+			} elseif (is_string($value)) {
+				$flags[] = '--' . $key . ' ' . escapeshellarg($value);
 			}
 		}
 

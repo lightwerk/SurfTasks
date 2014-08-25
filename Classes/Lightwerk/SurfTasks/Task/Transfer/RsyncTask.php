@@ -14,7 +14,9 @@ use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Task;
 
 /**
- * Rsync
+ * Rsync Task
+ *
+ * @package Lightwerk\SurfTasks
  */
 class RsyncTask extends Task {
 
@@ -43,10 +45,14 @@ class RsyncTask extends Task {
 		$localhost = new Node('localhost');
 		$localhost->setHostname('localhost');
 		$this->rsyncService->sync(
-			$localhost, // $sourceNode
-			$deployment->getWorkspacePath($application), // $sourcePath
-			$node, // $destnationNode
-			$deployment->getApplicationReleasePath($application), // $destinationPath
+			// $sourceNode
+			$localhost,
+			// $sourcePath
+			$deployment->getWorkspacePath($application),
+			// $destinationNode
+			$node,
+			// $destinationPath
+			$deployment->getApplicationReleasePath($application),
 			$deployment,
 			$options
 		);

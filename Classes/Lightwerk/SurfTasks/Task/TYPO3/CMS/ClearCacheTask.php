@@ -5,16 +5,18 @@ namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
  * This script belongs to the TYPO3 Flow package "TYPO3.Surf".            *
  *                                                                        */
 
-use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
-
-use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Surf\Domain\Model\Task;
 
 /**
  * Clears caches in the database and the filesystem
+ *
+ * @package Lightwerk\SurfTasks
  */
-class ClearCacheTask extends \TYPO3\Surf\Domain\Model\Task {
+class ClearCacheTask extends Task {
 
 	/**
 	 * @Flow\Inject
@@ -25,9 +27,9 @@ class ClearCacheTask extends \TYPO3\Surf\Domain\Model\Task {
 	/**
 	 * Executes this task
 	 *
-	 * @param \TYPO3\Surf\Domain\Model\Node $node
-	 * @param \TYPO3\Surf\Application\TYPO3\Flow $application
-	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
+	 * @param Node $node
+	 * @param Application $application
+	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return void
 	 */

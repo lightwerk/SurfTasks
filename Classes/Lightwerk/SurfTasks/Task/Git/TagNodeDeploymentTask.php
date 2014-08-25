@@ -6,16 +6,19 @@ namespace Lightwerk\SurfTasks\Task\Git;
  *                                                                        *
  *                                                                        */
 
-use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
-
-use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Surf\Domain\Model\Task;
+use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
  * Tags the deployed commit with the node name
+ *
+ * @package Lightwerk\SurfTasks
  */
-class TagNodeDeploymentTask extends \TYPO3\Surf\Domain\Model\Task {
+class TagNodeDeploymentTask extends Task {
 
 	/**
 	 * @Flow\Inject
@@ -26,11 +29,12 @@ class TagNodeDeploymentTask extends \TYPO3\Surf\Domain\Model\Task {
 	/**
 	 * Executes this task
 	 *
-	 * @param \TYPO3\Surf\Domain\Model\Node $node
-	 * @param \TYPO3\Surf\Domain\Model\Application $application
-	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
+	 * @param Node $node
+	 * @param Application $application
+	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return void
+	 * @throws InvalidConfigurationException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		if (isset($options['useApplicationWorkspace']) && $options['useApplicationWorkspace'] === TRUE) {
@@ -45,7 +49,7 @@ class TagNodeDeploymentTask extends \TYPO3\Surf\Domain\Model\Task {
 		if (!empty($options['nodeName'])) {
 			$node = $deployment->getNode($options['nodeName']);
 			if ($node === NULL) {
-				throw new \TYPO3\Surf\Exception\InvalidConfigurationException(
+				throw new InvalidConfigurationException(
 					sprintf('Node "%s" not found', $options['nodeName']),
 					1408441582
 				);
