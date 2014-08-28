@@ -42,7 +42,11 @@ class RsyncService {
 		'compress' => TRUE,
 		'verbose' => TRUE,
 		'quiet' => TRUE,
-		'rsh' => 'ssh -p 22'
+		'rsh' => 'ssh -p 22',
+		'omit-dir-times' => TRUE,
+		'o' => array(
+			'BatchMode' => 'yes',
+		),
 	);
 
 	/**
@@ -127,16 +131,25 @@ class RsyncService {
 		}
 
 		foreach ($flagOptions as $key => $value) {
+			$prefix = strlen($key) === 1 ? '-' : '--';
 			if (is_bool($value)) {
 				if ($value) {
-					$flags[] = '--' . $key;
+					// of example "--quiet"
+					$flags[] = $prefix . $key;
 				}
 			} elseif (is_array($value)) {
-				foreach ($value as $subValue) {
-					$flags[] = '--' . $key . ' ' . escapeshellarg($subValue);
+				foreach ($value as $subKey => $subValue) {
+					if (is_int($subKey)) {
+						// of example "--exclude 'dir'"
+						$flags[] = $prefix . $key . ' ' . escapeshellarg($subValue);
+					} else {
+						// of example "-o BatchMode='yes'"
+						$flags[] = $prefix . $key . ' ' . $subKey . '=' . escapeshellarg($subValue);
+					}
 				}
 			} elseif (is_string($value)) {
-				$flags[] = '--' . $key . ' ' . escapeshellarg($value);
+				// of example "--rsh 'ssh -p 22'"
+				$flags[] = $prefix . $key . ' ' . escapeshellarg($value);
 			}
 		}
 

@@ -7,10 +7,10 @@ namespace Lightwerk\SurfTasks\Task\Transfer;
  *                                                                        */
 
 use Lightwerk\SurfTasks\Service\RsyncService;
-use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
-use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 
 /**
@@ -42,11 +42,9 @@ class RsyncTask extends Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$localhost = new Node('localhost');
-		$localhost->setHostname('localhost');
 		$this->rsyncService->sync(
 			// $sourceNode
-			$localhost,
+			$deployment->getNode('localhost'),
 			// $sourcePath
 			$deployment->getWorkspacePath($application),
 			// $destinationNode

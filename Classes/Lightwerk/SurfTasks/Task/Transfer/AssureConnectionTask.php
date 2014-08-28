@@ -6,10 +6,10 @@ namespace Lightwerk\SurfTasks\Task\Transfer;
  *                                                                        *
  *                                                                        */
 
-use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
-use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
@@ -29,10 +29,11 @@ class AssureConnectionTask extends Task {
 	/**
 	 * Executes this task
 	 *
-	 * @param \TYPO3\Surf\Domain\Model\Node $node
-	 * @param \TYPO3\Surf\Domain\Model\Application $application
-	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
+	 * @param Node $node
+	 * @param Application $application
+	 * @param Deployment $deployment
 	 * @param array $options
+	 * @throws TaskExecutionException
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
