@@ -37,7 +37,7 @@ class AssureConnectionTask extends Task {
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		if ($node === NULL || $node->isLocalhost()) {
-			$deployment->getLogger()->log('node seems not remote', LOG_DEBUG);
+			$deployment->getLogger()->log('node seems not to be a remote node', LOG_DEBUG);
 		} else {
 
 			$username = $node->hasOption('username') ? $node->getOption('username') : NULL;
@@ -53,10 +53,9 @@ class AssureConnectionTask extends Task {
 			$command = 'ssh ' . implode(' ', $sshOptions) . ' ' . escapeshellarg($username . $hostname) . ' exit;';
 			$return = $this->shell->executeProcess($deployment, $command, FALSE, '');
 			if ($return[0] !== 0) {
-				$deployment->getLogger()->log('ssh connection failed ' . $command, LOG_ERR);
 				throw new TaskExecutionException('ssh connection failed ' . $command, 1409156749);
 			} else {
-				$deployment->getLogger()->log('ssh connection successed', LOG_DEBUG);
+				$deployment->getLogger()->log('ssh connection successfully established', LOG_DEBUG);
 			}
 		}
 	}
