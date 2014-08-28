@@ -6,10 +6,10 @@ namespace Lightwerk\SurfTasks\Task\Transfer;
  *                                                                        *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
-use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
@@ -37,27 +37,25 @@ class AssureConnectionTask extends Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		if ($node === NULL || $node->isLocalhost()) {
+		if ($node->isLocalhost()) {
 			$deployment->getLogger()->log('node seems not to be a remote node', LOG_DEBUG);
 		} else {
-
 			$username = $node->hasOption('username') ? $node->getOption('username') : NULL;
 			if (!empty($username)) {
 				$username = $username . '@';
 			}
+
 			$hostname = $node->getHostname();
 
 			$sshOptions = array('-A', '-q', '-o BatchMode=yes');
 			if ($node->hasOption('port')) {
 				$sshOptions[] = '-p ' . escapeshellarg($node->getOption('port'));
 			}
+
 			$command = 'ssh ' . implode(' ', $sshOptions) . ' ' . escapeshellarg($username . $hostname) . ' exit;';
-			$return = $this->shell->executeProcess($deployment, $command, FALSE, '');
-			if ($return[0] !== 0) {
-				throw new TaskExecutionException('ssh connection failed ' . $command, 1409156749);
-			} else {
-				$deployment->getLogger()->log('ssh connection successfully established', LOG_DEBUG);
-			}
+
+			$this->shell->execute($command, $deployment->getNode('localhost'), $deployment);
+			$deployment->getLogger()->log('SSH connection successfully established', LOG_DEBUG);
 		}
 	}
 
