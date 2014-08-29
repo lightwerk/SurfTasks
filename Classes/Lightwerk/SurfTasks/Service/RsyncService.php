@@ -42,11 +42,8 @@ class RsyncService {
 		'compress' => TRUE,
 		'verbose' => TRUE,
 		'quiet' => TRUE,
-		'rsh' => 'ssh -p 22',
+		'rsh' => 'ssh -p 22 -o BatchMode=yes',
 		'omit-dir-times' => TRUE,
-		'o' => array(
-			'BatchMode' => 'yes',
-		),
 	);
 
 	/**
@@ -68,7 +65,7 @@ class RsyncService {
 
 		$externalNode = $this->getFirstExternalNode($sourceNode, $destinationNode);
 		if ($externalNode instanceof Node && $externalNode->hasOption('port')) {
-			$flagOptions['rsh'] = 'ssh -p ' . (int) $externalNode->getOption('port');
+			$flagOptions['rsh'] = 'ssh -p ' . (int) $externalNode->getOption('port') . ' -o BatchMode=yes';
 		}
 
 		if (!isset($options['keepVcs']) || empty($options['keepVcs'])) {
