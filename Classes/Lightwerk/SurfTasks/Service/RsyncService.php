@@ -82,8 +82,7 @@ class RsyncService {
 		$command[] = $this->getFullPath($sourceNode, $sourcePath);
 		$command[] = $this->getFullPath($destinationNode, $destinationPath);
 
-		$localhost = new Node('localhost');
-		$localhost->setHostname('localhost');
+		$localhost = $deployment->getNode('localhost');
 		$this->shell->executeOrSimulate(implode(' ', $command), $localhost, $deployment);
 	}
 
@@ -144,7 +143,7 @@ class RsyncService {
 						$flags[] = $prefix . $key . ' ' . escapeshellarg($subValue);
 					} else {
 						// of example "-o BatchMode='yes'"
-						$flags[] = $prefix . $key . ' ' . $subKey . '=' . escapeshellarg($subValue);
+						$flags[] = $prefix . $key . ' ' . $subKey . '=' . $subValue;
 					}
 				}
 			} elseif (is_string($value)) {
