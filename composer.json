@@ -2,7 +2,7 @@
     "name": "lightwerk/surftasks",
     "type": "typo3-flow-package",
     "description": "Additional tasks for TYPO3.Surf.",
-    "license": "GPL-3.0+",
+    "license": ["GPL-3.0+"],
     "homepage": "https://bitbucket.org/lightwerk/surftasks",
     "keywords": [
         "TYPO3 Surf",
