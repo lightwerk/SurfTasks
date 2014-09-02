@@ -36,12 +36,10 @@ class ClearCacheTask extends Task {
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$commands = array();
 		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-		$commands[] = 'rm -rf ' . escapeshellarg('typo3temp/Cache') . ' ' . escapeshellarg('typo3conf/temp_*');
 		if (!empty($options['context'])) {
 			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
 		}
 		$commands[] = 'typo3/cli_dispatch.phpsh extbase cacheapi:clearallcaches';
-		$commands[] = 'rm -rf ' . escapeshellarg('typo3temp/Cache') . ' ' . escapeshellarg('typo3conf/temp_*');
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
