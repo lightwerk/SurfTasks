@@ -35,14 +35,14 @@ class UpdateDatabaseTask extends Task {
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		// Actions:
-		//	* 1 = ACTION_UPDATE_CLEAR_TABLE
-		//	* 2 = ACTION_UPDATE_ADD
-		//	* 3 = ACTION_UPDATE_CHANGE
-		//	* 4 = ACTION_UPDATE_CREATE_TABLE
-		//	  5 = ACTION_REMOVE_CHANGE
-		//	  6 = ACTION_REMOVE_DROP
-		//	  7 = ACTION_REMOVE_CHANGE_TABLE
-		//	  8 = ACTION_REMOVE_DROP_TABLE
+		// * 1 = ACTION_UPDATE_CLEAR_TABLE
+		// * 2 = ACTION_UPDATE_ADD
+		// * 3 = ACTION_UPDATE_CHANGE
+		// * 4 = ACTION_UPDATE_CREATE_TABLE
+		//   5 = ACTION_REMOVE_CHANGE
+		//   6 = ACTION_REMOVE_DROP
+		//   7 = ACTION_REMOVE_CHANGE_TABLE
+		//   8 = ACTION_REMOVE_DROP_TABLE
 		$actions = !empty($options['updateDatabaseActions']) ? $options['updateDatabaseActions'] : '1,2,3,4';
 
 		$commands = array();
@@ -50,7 +50,9 @@ class UpdateDatabaseTask extends Task {
 		if (!empty($options['context'])) {
 			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
 		}
-		$commands[] = 'typo3/cli_dispatch.phpsh extbase databaseapi:databasecompare ' . escapeshellarg($actions);
+		$commands[] = 'if [ -d "typo3conf/ext/coreapi" ]; then ' .
+			'typo3/cli_dispatch.phpsh extbase databaseapi:databasecompare ' . escapeshellarg($actions) . '; ' .
+			'fi';
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
