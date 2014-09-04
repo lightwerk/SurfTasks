@@ -46,8 +46,8 @@ class RemoveDeployBranchTask extends Task {
 		$commands = array();
 		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
 		$commands[] = 'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
+			'git branch -f ' . $quietFlag . ' ' . escapeshellarg($options['branch']) . ' deploy && ' .
 			'git checkout ' . $quietFlag . ' ' . escapeshellarg($options['branch']) . ' && ' .
-			'git merge --ff ' . $quietFlag . ' ' . escapeshellarg('origin/' . $options['branch']) . ' && ' .
 			'git branch -D deploy ' . $quietFlag . '; ' .
 		'fi;';
 
