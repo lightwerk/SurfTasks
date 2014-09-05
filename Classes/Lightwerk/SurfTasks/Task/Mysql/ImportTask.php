@@ -75,11 +75,18 @@ class ImportTask extends Task {
 		);
 		$mysqlArguments = $this->mysqlService->getMysqlArguments($mysqlOptions);
 
-		$commands = array(
-			'cd ' . escapeshellarg($application->getReleasesPath()),
-			'cd ' . escapeshellarg($mysqlOptions['sourcePath']),
-			'gzip -d < ' . escapeshellarg($mysqlOptions['sourceFile']) . ' | mysql ' . $mysqlArguments,
-		);
+		if (!empty($options['database'])) {
+			$commands = array(
+				'echo "CREATE DATABASE IF NOT EXISTS ' . escapeshellarg($options['database']) .
+					' DEFAULT CHARACTER SET = \'utf8\'' .
+					' DEFAULT COLLATE \'utf8_general_ci\'"' .
+					' | mysql ' . $mysqlArguments
+			);
+		}
+
+		$commands[] = 'cd ' . escapeshellarg($application->getReleasesPath());
+		$commands[] = 'cd ' . escapeshellarg($mysqlOptions['sourcePath']);
+		$commands[] = 'gzip -d < ' . escapeshellarg($mysqlOptions['sourceFile']) . ' | mysql ' . $mysqlArguments;
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment, FALSE, FALSE);
 	}
