@@ -59,7 +59,7 @@ class TagNodeDeploymentTask extends Task {
 
 		$commands = array(
 			'cd ' . escapeshellarg($gitRootPath),
-			'git tag --force ' . $quietFlag . ' -- ' . escapeshellarg($tagName),
+			'git tag --force -- ' . escapeshellarg($tagName),
 			'git push origin --force ' . $quietFlag . ' -- ' . escapeshellarg($tagName),
 		);
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
