@@ -13,7 +13,7 @@ use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 
 /**
- * Writes a deployment log on target server
+ * Calls a URI
  *
  * @package Lightwerk\SurfTasks
  */
