@@ -45,6 +45,7 @@ class TagNodeDeploymentTask extends Task {
 
 		$tagPrefix = isset($options['deploymentTagPrefix']) ? $options['deploymentTagPrefix'] : 'server-';
 		$tagName = preg_replace('/[^a-zA-Z0-9-_\.]*/', '', $tagPrefix . $node->getName());
+		$quietFlag = (isset($options['verbose']) && $options['verbose']) ? '' : '-q';
 
 		if (!empty($options['nodeName'])) {
 			$node = $deployment->getNode($options['nodeName']);
@@ -58,8 +59,8 @@ class TagNodeDeploymentTask extends Task {
 
 		$commands = array(
 			'cd ' . escapeshellarg($gitRootPath),
-			'git tag --force -- ' . escapeshellarg($tagName),
-			'git push --tags --force'
+			'git tag --force ' . $quietFlag . ' -- ' . escapeshellarg($tagName),
+			'git push origin --force ' . $quietFlag . ' -- ' . escapeshellarg($tagName),
 		);
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
