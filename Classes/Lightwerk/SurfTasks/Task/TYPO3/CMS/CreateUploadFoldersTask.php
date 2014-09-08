@@ -53,6 +53,7 @@ class CreateUploadFoldersTask extends Task {
 		if (!empty($options['context'])) {
 			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
 		}
+		$commands[] = 'export HTTP_HOST=' . escapeshellarg($node->getHostname());
 		$commands[] = 'if [ -d "typo3conf/ext/coreapi" ]; then ' .
 			'typo3/cli_dispatch.phpsh extbase extensionapi:createuploadfolders; ' .
 			'fi';
