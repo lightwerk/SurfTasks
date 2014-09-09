@@ -39,6 +39,7 @@ class RsyncService {
 		'perms' => TRUE,
 		'links' => TRUE,
 		'delete' => TRUE,
+		'delete-excluded' => TRUE,
 		'compress' => TRUE,
 		'verbose' => TRUE,
 		'quiet' => TRUE,
