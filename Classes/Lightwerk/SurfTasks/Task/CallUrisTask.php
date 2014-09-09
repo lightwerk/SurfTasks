@@ -13,11 +13,11 @@ use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 
 /**
- * Calls a URI
+ * Calls URIs
  *
  * @package Lightwerk\SurfTasks
  */
-class DeploymentLogTask extends Task {
+class CallUrisTask extends Task {
 
 
 	/**
@@ -51,11 +51,7 @@ class DeploymentLogTask extends Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		if (empty($options['callUri'])) {
-			return;
-		}
-		$deployment->getLogger()->log('... (localhost): curl "' . $options['callUri'] . '"', LOG_DEBUG);
-		$this->browser->request($options['callUri']);
+		$this->executeOrSimulate($node, $application, $deployment, $options);
 	}
 
 	/**
@@ -68,7 +64,27 @@ class DeploymentLogTask extends Task {
 	 * @return void
 	 */
 	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$deployment->getLogger()->log('... (localhost): curl "' . $options['callUri'] . '"', LOG_DEBUG);
+		$this->executeOrSimulate($node, $application, $deployment, $options);
+	}
+
+	/**
+	 * @param Node $node
+	 * @param Application $application
+	 * @param Deployment $deployment
+	 * @param array $options
+	 * @throws \TYPO3\Flow\Http\Client\InfiniteRedirectionException
+	 */
+	protected function executeOrSimulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
+		if (empty($options['callUris'])) {
+			return;
+		}
+		$uris = is_array($options['callUris']) ? $options['callUris'] : array($options['callUris']);
+		foreach ($uris as $uri) {
+			$deployment->getLogger()->log('... (localhost): curl "' . $uri . '"', LOG_DEBUG);
+			if ($deployment->isDryRun() === FALSE) {
+				$this->browser->request($uri);
+			}
+		}
 	}
 
 }
