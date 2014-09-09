@@ -53,8 +53,8 @@ class TransferTask extends AbstractTask {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$sourceNode = $this->getNode($node, $options);
-		$sourceOptions = $this->getOptions($options);
+		$sourceNode = $this->getSourceNode($options);
+		$sourceOptions = $this->getNodeOptions($options);
 		$source = $this->getArgument($sourceNode, $application, $sourceOptions['sourceFile'], $sourceOptions);
 
 		$targetNode = $node;

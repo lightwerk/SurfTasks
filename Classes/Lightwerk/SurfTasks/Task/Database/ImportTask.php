@@ -6,11 +6,11 @@ namespace Lightwerk\SurfTasks\Task\Database;
  *                                                                        *
  *                                                                        */
 
-use Lightwerk\SurfRunner\Factory\NodeFactory;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * MySQL Import Task
@@ -23,12 +23,11 @@ class ImportTask extends AbstractTask {
 	 * @var array
 	 */
 	protected $options = array(
-//		'truncateTables' => array(
-//			 'tableName' => TRUE,
-//		),
+		'truncateTables' => array(
+			// 'tableName' => TRUE,
+		),
 		'sourceFile' => 'mysqldump.sql.gz',
 		'credentialsSource' => 'TYPO3\\CMS',
-		'nodeName' => '',
 	);
 
 	/**
@@ -42,24 +41,27 @@ class ImportTask extends AbstractTask {
 	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$node = $this->getNode($node, $options);
-		$options = $this->getOptions($options);
-		$options = array_merge($options, $this->getCredentials($options['credentialsSource'], $node, $application, $deployment, $options));
-
+		$options = $this->getNodeOptions($node, $application, $deployment, $options);
 		$mysqlArguments = $this->getMysqlArguments($options);
-		$deploymentPath = !empty($options['deploymentPath']) ? $options['deploymentPath'] : $application->getDeploymentPath();
+		if (empty($options['deploymentPath'])) {
+			throw new TaskExecutionException('No deploymentPath given in options.', 1409989771);
+		}
 
-		$commands = array(
-			'cd ' . escapeshellarg($deploymentPath),
-			'gzip -d < ' . escapeshellarg($options['sourceFile']) . ' | mysql ' . $mysqlArguments,
-		);
+		$commands = array();
+		if (!empty($options['database'])) {
+			$commands[] = 'echo "CREATE DATABASE IF NOT EXISTS ' . escapeshellarg($options['database']) .
+				' DEFAULT CHARACTER SET = \'utf8\'' .
+				' DEFAULT COLLATE \'utf8_general_ci\'"' .
+				' | mysql ' . $mysqlArguments;
+		}
+		$commands[] = 'cd ' . escapeshellarg($options['deploymentPath']);
+		$commands[] = 'gzip -d < ' . escapeshellarg($options['sourceFile']) . ' | mysql ' . $mysqlArguments;
+		$commands[] = $this->getTruncateCommand($mysqlArguments, $options);
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment, FALSE, FALSE);
 	}
 
 	/**
-	 * Simulate this task
-	 *
 	 * @param Node $node
 	 * @param Application $application
 	 * @param Deployment $deployment
@@ -68,5 +70,23 @@ class ImportTask extends AbstractTask {
 	 */
 	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$this->execute($node, $application, $deployment, $options);
+	}
+
+	/**
+	 * @param string $mysqlArguments
+	 * @param array $options
+	 * @return string
+	 */
+	protected function getTruncateCommand($mysqlArguments, array $options) {
+		$truncates = array();
+		if (!empty($options['truncateTables']) && is_array($options['truncateTables'])) {
+			foreach ($options['truncateTables'] as $table => $enabled) {
+				if ($enabled) {
+					$truncates = 'TRUNCATE ' . escapeshellarg($table);
+				}
+			}
+		}
+
+		return 'mysql -N ' . $mysqlArguments . ' -e "' . implode('; ', $truncates) . '"';
 	}
 }

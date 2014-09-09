@@ -6,9 +6,7 @@ namespace Lightwerk\SurfTasks\Task\Database;
  *                                                                        *
  *                                                                        */
 
-use Lightwerk\SurfRunner\Domain\Model\Application\AbstractApplication;
 use Lightwerk\SurfRunner\Factory\NodeFactory;
-use Lightwerk\SurfTasks\Service\DatabaseCredentialsService;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
@@ -42,53 +40,38 @@ abstract class AbstractTask extends Task {
 	protected $options = array();
 
 	/**
-	 * @param Node $node
-	 * @param array $options
-	 * @return Node
-	 * @throws InvalidConfigurationException
-	 * @throws \Lightwerk\SurfRunner\Factory\Exception
+	 * @var array
 	 */
-	protected function getNode(Node $node, array $options) {
-		if (empty($options['nodeName'])) {
-			return $node;
-		}
+	protected $databaseArguments = array('username', 'password', 'host', 'socket', 'port', 'database');
 
-		$nodeName = $options['nodeName'];
-		if (empty($options[$nodeName]) || !is_array($options[$nodeName])) {
-			throw new InvalidConfigurationException('Node "' . $nodeName . '" not found', 1408441582);
-		}
 
-		return $this->nodeFactory->getNodeByArray($options[$nodeName]);
-	}
 
 	/**
-	 * @param array $taskOptions
+	 * Returns node options
+	 *
+	 * @param Node $node
+	 * @param Application $application
+	 * @param Deployment $deployment
+	 * @param array $options
 	 * @return array
 	 */
-	protected function getOptions($taskOptions) {
-		$options = array_merge($this->options, $taskOptions);
-
-		if (!empty($taskOptions['database']) && is_array($taskOptions['database'])) {
-			$options = array_merge($options, $taskOptions['database']);
-		}
-
-		$nodeName = $options['nodeName'];
-		if (!empty($options[$nodeName]['database']) && is_array($options[$nodeName]['database'])) {
-			$options = array_merge($options, $options[$nodeName]['database']);
-		}
-
+	protected function getNodeOptions(Node $node, Application $application, Deployment $deployment, array $options) {
+		$options = array_merge($this->options, $node->getOptions());
+		$options = array_merge($options, $this->getCredentials($node, $application, $deployment, $options));
 		return $options;
 	}
 
 	/**
+	 * Returns MySQL Arguments
+	 *
 	 * @param array $options
 	 * @return string
 	 */
 	protected function getMysqlArguments($options) {
 		$arguments = array();
-		$argumentKeys = array('username', 'password', 'host', 'socket', 'port');
 
-		foreach ($argumentKeys as $key) {
+		foreach ($this->databaseArguments as $key) {
+			$key = 'db' . ucfirst($key);
 			if (empty($options[$key])) {
 				continue;
 			}
@@ -100,13 +83,12 @@ abstract class AbstractTask extends Task {
 			}
 		}
 
-		if (!empty($options['database'])) {
-			$arguments[] = $options['database'];
-		}
 		return implode(' ', $arguments);
 	}
 
 	/**
+	 * Get credentials from TYPO3 CMS
+	 *
 	 * @param Node $node
 	 * @param Application $application
 	 * @param Deployment $deployment
@@ -123,16 +105,23 @@ abstract class AbstractTask extends Task {
 		$commands[] = 'typo3/cli_dispatch.phpsh extbase configurationapi:show DB';
 
 		$returnedOutput = $this->shell->execute($commands, $node, $deployment, FALSE, FALSE);
-
-		$credentials = json_decode($returnedOutput, TRUE);
-		if (empty($credentials)) {
+		$returnedOutput = json_decode($returnedOutput, TRUE);
+		if (empty($returnedOutput)) {
 			throw new TaskExecutionException('Could not receive database credentials', 1409252546);
 		}
+
+		$credentials = array();
+		foreach ($returnedOutput as $key => $value) {
+			$newKey = 'db' . ucfirst($key);
+			$credentials[$newKey] = $value;
+		}
+
 		return $credentials;
 	}
 
 	/**
-	 * @param $credentialsSource
+	 * Returns database credentials
+	 *
 	 * @param Node $node
 	 * @param Application $application
 	 * @param Deployment $deployment
@@ -140,8 +129,8 @@ abstract class AbstractTask extends Task {
 	 * @return array|mixed
 	 * @throws TaskExecutionException
 	 */
-	protected function getCredentials($credentialsSource, Node $node, Application $application, Deployment $deployment, array $options) {
-		switch ($credentialsSource) {
+	protected function getCredentials(Node $node, Application $application, Deployment $deployment, array $options) {
+		switch ($options['credentialsSource']) {
 			case 'TYPO3\\CMS':
 				$credentials = $this->getCredentialsFromTypo3Cms($node, $application, $deployment, $options);
 				break;

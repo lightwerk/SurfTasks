@@ -10,6 +10,8 @@ use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Surf\Exception\InvalidConfigurationException;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * MySQL Dump Task
@@ -42,7 +44,6 @@ class DumpTask extends AbstractTask {
 		'targetFile' => 'mysqldump.sql.gz',
 		'fullDump' => FALSE,
 		'credentialsSource' => 'TYPO3\\CMS',
-		'nodeName' => 'sourceNode',
 	);
 
 	/**
@@ -50,22 +51,21 @@ class DumpTask extends AbstractTask {
 	 * @param Application $application
 	 * @param Deployment $deployment
 	 * @param array $options
-	 * @return void
-	 * @throws \Lightwerk\SurfRunner\Factory\Exception
+	 * @throws TaskExecutionException
 	 * @throws \TYPO3\Surf\Exception\InvalidConfigurationException
-	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$node = $this->getNode($node, $options);
-		$options = $this->getOptions($options);
-		$options = array_merge($options, $this->getCredentials($options['credentialsSource'], $node, $application, $deployment, $options));
+		$node = $this->getSourceNode($options);
+		$options = $this->getNodeOptions($node, $application, $deployment, $options);
 
 		$mysqlArguments = $this->getMysqlArguments($options);
 		$tableLikes = $this->getTableLikes($options);
-		$deploymentPath = !empty($options['deploymentPath']) ? $options['deploymentPath'] : $application->getDeploymentPath();
+		if (empty($options['deploymentPath'])) {
+			throw new TaskExecutionException('No deploymentPath given in options.', 1409989771);
+		}
 
 		$commands = array(
-			'cd ' . escapeshellarg($deploymentPath),
+			'cd ' . escapeshellarg($options['deploymentPath']),
 			': > ' . $options['targetFile'],
 			$this->getStructureCommand($mysqlArguments, $tableLikes, $options['targetFile']),
 			$this->getDataTablesCommand($mysqlArguments, $tableLikes, $options['targetFile']),
@@ -75,8 +75,6 @@ class DumpTask extends AbstractTask {
 	}
 
 	/**
-	 * Simulate this task
-	 *
 	 * @param Node $node
 	 * @param Application $application
 	 * @param Deployment $deployment
@@ -85,6 +83,19 @@ class DumpTask extends AbstractTask {
 	 */
 	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$this->execute($node, $application, $deployment, $options);
+	}
+
+	/**
+	 * @param array $options
+	 * @return Node
+	 * @throws InvalidConfigurationException
+	 * @throws \Lightwerk\SurfRunner\Factory\Exception
+	 */
+	protected function getSourceNode($options) {
+		if (empty($options['sourceNode']) || !is_array($options['sourceNode'])) {
+			throw new InvalidConfigurationException('Node "sourceNode" not found', 1408441582);
+		}
+		return $this->nodeFactory->getNodeByArray($options['sourceNode']);
 	}
 
 	/**
@@ -100,7 +111,7 @@ class DumpTask extends AbstractTask {
 			if (!$enabled) {
 				continue;
 			}
-			$tablesLike[] = 'Tables_in_' . $options['host'] . ' LIKE ' . escapeshellarg($table);
+			$tablesLike[] = 'Tables_in_' . $options['dbDatabase'] . ' LIKE ' . escapeshellarg($table);
 		}
 		return $tablesLike;
 	}
