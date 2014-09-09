@@ -76,6 +76,7 @@ class ClearPhpCacheTask extends Task {
 	 */
 	protected function executeOrSimulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		if (empty($options['clearPhpCacheUris'])) {
+			$deployment->getLogger()->log('Nothing to do', LOG_DEBUG);
 			return;
 		}
 		$uris = is_array($options['clearPhpCacheUris']) ? $options['clearPhpCacheUris'] : array($options['clearPhpCacheUris']);
