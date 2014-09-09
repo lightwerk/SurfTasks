@@ -13,11 +13,11 @@ use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 
 /**
- * Calls URIs
+ * Clears the OpCode Cache of PHP
  *
  * @package Lightwerk\SurfTasks
  */
-class CallUrisTask extends Task {
+class ClearPhpCacheTask extends Task {
 
 
 	/**
@@ -75,10 +75,10 @@ class CallUrisTask extends Task {
 	 * @throws \TYPO3\Flow\Http\Client\InfiniteRedirectionException
 	 */
 	protected function executeOrSimulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		if (empty($options['callUris'])) {
+		if (empty($options['clearPhpCacheUris'])) {
 			return;
 		}
-		$uris = is_array($options['callUris']) ? $options['callUris'] : array($options['callUris']);
+		$uris = is_array($options['clearPhpCacheUris']) ? $options['clearPhpCacheUris'] : array($options['clearPhpCacheUris']);
 		foreach ($uris as $uri) {
 			$deployment->getLogger()->log('... (localhost): curl "' . $uri . '"', LOG_DEBUG);
 			if ($deployment->isDryRun() === FALSE) {
