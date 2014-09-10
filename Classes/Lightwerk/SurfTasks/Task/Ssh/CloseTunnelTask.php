@@ -6,6 +6,7 @@ namespace Lightwerk\SurfTasks\Task\Ssh;
  *                                                                        *
  *                                                                        */
 
+use Lightwerk\SurfTasks\Service\SshTunnelService;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
@@ -13,7 +14,7 @@ use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 
 /**
- * Starts an SSH Tunnel
+ * Closes a SSH Tunnel
  *
  * @package Lightwerk\SurfTasks
  */
@@ -21,9 +22,9 @@ class CloseTunnelTask extends Task {
 
 	/**
 	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+	 * @var SshTunnelService
 	 */
-	protected $shell;
+	protected $sshTunnelService;
 
 	/**
 	 * Executes this task
@@ -35,16 +36,7 @@ class CloseTunnelTask extends Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		if (!$deployment->hasOption('sshTunnelRunningSocketName') || empty($options['sshTunnelHostname'])) {
-			$deployment->getLogger()->log('Nothing to do', LOG_DEBUG);
-			return;
-		}
-		$socketName = $deployment->hasOption('sshTunnelRunningSocketName');
-		$this->shell->execute(
-			'ssh -S ' . $socketName . ' -O exit ' . $options['sshTunnelHostname'],
-			$deployment->getNode('localhost'),
-			$deployment
-		);
+		$this->sshTunnelService->closeTunnel($deployment, $options);
 	}
 
 	/**
