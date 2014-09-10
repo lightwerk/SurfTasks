@@ -53,7 +53,7 @@ class SshTunnelService {
 		$commands = array(
 			'mkdir -p ' . escapeshellarg($socketDirectory),
 			'cd ' . escapeshellarg($socketDirectory),
-			'ssh -f -N -q -M -S ' . $socketName . ' -L ' . escapeshellarg($options['sshTunnelL']) . ' ' . escapeshellarg($options['sshTunnelHostname']),
+			'ssh -o BatchMode=yes -f -N -q -M -S ' . $socketName . ' -L ' . escapeshellarg($options['sshTunnelL']) . ' ' . escapeshellarg($options['sshTunnelHostname']),
 		);
 
 		$this->shell->execute($commands, $deployment->getNode('localhost'), $deployment);
@@ -81,7 +81,7 @@ class SshTunnelService {
 		$socketName = $deployment->getOption('sshTunnelRunningSocketName');
 		$commands = array(
 			'cd ' . escapeshellarg($socketDirectory),
-			'ssh -S ' . $socketName . ' -O exit ' . escapeshellarg($options['sshTunnelHostname'])
+			'ssh -o BatchMode=yes -S ' . $socketName . ' -O exit ' . escapeshellarg($options['sshTunnelHostname'])
 		);
 
 		$this->shell->execute($commands, $deployment->getNode('localhost'), $deployment);
