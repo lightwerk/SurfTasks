@@ -36,7 +36,7 @@ class OpenTunnelTask extends Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->sshTunnelService->openTunnel($deployment, $options);
+		$this->sshTunnelService->openTunnel($application, $deployment, $options);
 	}
 
 	/**
