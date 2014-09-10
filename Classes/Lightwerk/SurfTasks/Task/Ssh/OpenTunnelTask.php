@@ -62,6 +62,6 @@ class OpenTunnelTask extends Task {
 	 * @return void
 	 */
 	public function rollback(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->sshTunnelService->closeTunnel($deployment, $options);
+		$this->sshTunnelService->closeTunnel($application, $deployment, $options);
 	}
 }

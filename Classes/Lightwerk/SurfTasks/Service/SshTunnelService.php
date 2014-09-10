@@ -46,10 +46,14 @@ class SshTunnelService {
 			return;
 		}
 
-		$socketName = escapeshellarg($deployment->getWorkspacePath($application) . '-ssh-tunnel-socket');
+		$socketPath = $deployment->getWorkspacePath($application) . '-ssh-tunnel-socket';
+		$socketName = basename($socketPath);
+		$socketDirectory = dirname($socketPath);
+
 		$commands = array(
-			'mkdir -p ' . escapeshellarg(FLOW_PATH_DATA . 'Surf/'),
-			'ssh -f -N -q -M -S ' . $socketName . ' -L ' . $options['sshTunnelL'] . ' ' . $options['sshTunnelHostname'],
+			'mkdir -p ' . escapeshellarg($socketDirectory),
+			'cd ' . escapeshellarg($socketDirectory),
+			'ssh -f -N -q -M -S ' . escapeshellarg($socketName) . ' -L ' . $options['sshTunnelL'] . ' ' . $options['sshTunnelHostname'],
 		);
 
 		$this->shell->execute($commands, $deployment->getNode('localhost'), $deployment);
@@ -57,22 +61,28 @@ class SshTunnelService {
 	}
 
 	/**
+	 * @param Application $application
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return void
 	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
 	 */
-	public function closeTunnel(Deployment $deployment, array $options = array()) {
+	public function closeTunnel(Application $application, Deployment $deployment, array $options = array()) {
 		if (
-			!$deployment->hasOption('sshTunnelRunningSocketName') ||
-			!$deployment->getOption('sshTunnelRunningSocketName') ||
-			empty($options['sshTunnelHostname'])
+			$deployment->hasOption('sshTunnelRunningSocketName') === FALSE ||
+			$deployment->getOption('sshTunnelRunningSocketName') === FALSE ||
+			empty($options['sshTunnelHostname']) === TRUE
 		) {
 			return;
 		}
 
-		$socketName = $deployment->hasOption('sshTunnelRunningSocketName');
-		$commands = array('ssh -S ' . $socketName . ' -O exit ' . $options['sshTunnelHostname']);
+		$socketDirectory = dirname($deployment->getWorkspacePath($application));
+
+		$socketName = $deployment->getOption('sshTunnelRunningSocketName');
+		$commands = array(
+			'cd ' . escapeshellarg($socketDirectory),
+			'ssh -S ' . $socketName . ' -O exit ' . $options['sshTunnelHostname']
+		);
 
 		$this->shell->execute($commands, $deployment->getNode('localhost'), $deployment);
 		$deployment->setOption('sshTunnelRunningSocketName', FALSE);

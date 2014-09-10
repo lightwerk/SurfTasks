@@ -36,7 +36,7 @@ class CloseTunnelTask extends Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->sshTunnelService->closeTunnel($deployment, $options);
+		$this->sshTunnelService->closeTunnel($application, $deployment, $options);
 	}
 
 	/**
