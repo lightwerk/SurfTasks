@@ -9,7 +9,6 @@ namespace Lightwerk\SurfTasks\Service;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
-use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * SSH Tunnel Service
@@ -57,7 +56,7 @@ class SshTunnelService {
 			'ssh -o BatchMode=yes -o ExitOnForwardFailure=yes -f -N -M -S ' . $socketName . ' -L ' . escapeshellarg($options['sshTunnelL']) . ' ' . escapeshellarg($options['sshTunnelHostname']),
 		);
 
-		$this->executeCommands($commands, $deployment);
+		$this->shell->execute($commands, $deployment->getNode('localhost'), $deployment);
 		$deployment->setOption('sshTunnelRunningSocketName', $socketName);
 	}
 
@@ -85,23 +84,7 @@ class SshTunnelService {
 			'ssh -o BatchMode=yes -S ' . $socketName . ' -O exit ' . escapeshellarg($options['sshTunnelHostname'])
 		);
 
-		$this->executeCommands($commands, $deployment);
+		$this->shell->execute($commands, $deployment->getNode('localhost'), $deployment);
 		$deployment->setOption('sshTunnelRunningSocketName', FALSE);
-	}
-
-	/**
-	 * @param Deployment $deployment
-	 * @param array $commands
-	 */
-	public function executeCommands(array $commands, Deployment $deployment) {
-		$command = implode(' && ', $commands);
-		$deployment->getLogger()->log('... (localhost): "' . $command . '"', LOG_DEBUG);
-		exec($command, $output, $returnVar);
-		if ((int) $returnVar === 0) {
-			$deployment->getLogger()->log($output, LOG_WARNING);
-			throw new TaskExecutionException('Command returned non-zero return code: ' . $returnVar, 1410367900);
-		} else {
-			$deployment->getLogger()->log($output, LOG_DEBUG);
-		}
 	}
 }
