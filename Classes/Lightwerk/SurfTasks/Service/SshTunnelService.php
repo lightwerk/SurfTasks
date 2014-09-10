@@ -53,7 +53,7 @@ class SshTunnelService {
 		$commands = array(
 			'mkdir -p ' . escapeshellarg($socketDirectory),
 			'cd ' . escapeshellarg($socketDirectory),
-			'ssh -o BatchMode=yes -o ExitOnForwardFailure=yes -f -N -q -M -S ' . $socketName . ' -L ' . escapeshellarg($options['sshTunnelL']) . ' ' . escapeshellarg($options['sshTunnelHostname']),
+			'ssh -o BatchMode=yes -o ExitOnForwardFailure=yes -f -N -M -S ' . $socketName . ' -L ' . escapeshellarg($options['sshTunnelL']) . ' ' . escapeshellarg($options['sshTunnelHostname']),
 		);
 
 		$this->shell->execute($commands, $deployment->getNode('localhost'), $deployment);
