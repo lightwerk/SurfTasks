@@ -43,6 +43,10 @@ class TagNodeDeploymentTask extends Task {
 			$gitRootPath = $deployment->getApplicationReleasePath($application);
 		}
 
+		if (!empty($options['disableDeploymentTag'])) {
+			return;
+		}
+
 		$tagPrefix = isset($options['deploymentTagPrefix']) ? $options['deploymentTagPrefix'] : 'server-';
 		$tagName = preg_replace('/[^a-zA-Z0-9-_\.]*/', '', $tagPrefix . $node->getName());
 		$quietFlag = (isset($options['verbose']) && $options['verbose']) ? '' : '-q';
