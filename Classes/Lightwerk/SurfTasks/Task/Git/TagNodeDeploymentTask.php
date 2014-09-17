@@ -16,6 +16,12 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
 /**
  * Tags the deployed commit with the node name
  *
+ * "options": {
+ *   "disableDeploymentTag": false,
+ *   "deploymentTag": "server-",
+ *   "nodeName": ""
+ * }
+ *
  * @package Lightwerk\SurfTasks
  */
 class TagNodeDeploymentTask extends Task {
@@ -37,14 +43,14 @@ class TagNodeDeploymentTask extends Task {
 	 * @throws InvalidConfigurationException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
+		if (!empty($options['disableDeploymentTag'])) {
+			return;
+		}
+
 		if (isset($options['useApplicationWorkspace']) && $options['useApplicationWorkspace'] === TRUE) {
 			$gitRootPath = $deployment->getWorkspacePath($application);
 		} else {
 			$gitRootPath = $deployment->getApplicationReleasePath($application);
-		}
-
-		if (!empty($options['disableDeploymentTag'])) {
-			return;
 		}
 
 		$tagPrefix = isset($options['deploymentTagPrefix']) ? $options['deploymentTagPrefix'] : 'server-';
