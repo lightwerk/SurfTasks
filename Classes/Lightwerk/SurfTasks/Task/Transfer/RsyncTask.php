@@ -42,6 +42,13 @@ class RsyncTask extends Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
+		// Create directory if it does not exist
+		$this->shell->executeOrSimulate(
+			'mkdir -p ' . escapeshellarg($deployment->getApplicationReleasePath($application)),
+			$node,
+			$deployment
+		);
+		// Sync files
 		$this->rsyncService->sync(
 			// $sourceNode
 			$deployment->getNode('localhost'),
@@ -54,7 +61,6 @@ class RsyncTask extends Task {
 			$deployment,
 			$options
 		);
-		$deployment->getWorkspacePath($application);
 	}
 
 	/**
