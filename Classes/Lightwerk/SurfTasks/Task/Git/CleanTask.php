@@ -43,7 +43,7 @@ class CleanTask extends Task {
 			$gitRootPath = $deployment->getApplicationReleasePath($application);
 		}
 
-		$quietFlag = (isset($options['verbose']) && $options['verbose']) ? '' : '-q';
+//		$quietFlag = (isset($options['verbose']) && $options['verbose']) ? '' : '-q';
 
 		if (!empty($options['nodeName'])) {
 			$node = $deployment->getNode($options['nodeName']);
@@ -58,7 +58,7 @@ class CleanTask extends Task {
 		$commands = array(
 			'cd ' . escapeshellarg($gitRootPath),
 			'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
-				'git clean ' . $quietFlag . ' -d -ff && ' .
+//				'git clean ' . $quietFlag . ' -d -ff && ' .
 				'git checkout -- .; ' .
 				'fi;'
 		);
