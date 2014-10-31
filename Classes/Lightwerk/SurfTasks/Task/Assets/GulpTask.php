@@ -1,5 +1,5 @@
 <?php
-namespace Lightwerk\SurfTasks\Task\Gulp;
+namespace Lightwerk\SurfTasks\Task\Assets;
 
 /*                                                                        *
  * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTasks".   *
