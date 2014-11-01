@@ -56,18 +56,17 @@ class SyncSharedTask extends Task {
 		}
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
 
-		$sharedPath = $this->getSharedPathFromNode($sourceNode, $application, $deployment, $options);
+		$relativeSharedPath = $this->getRelativeSharedPathFromSourceNode($sourceNode, $deployment);
 		$localSharedPath = $deployment->getWorkspacePath($application) . '_shared/';
 
-		$localhost = new Node('localhost');
-		$localhost->setHostname('localhost');
+		$localhost = $deployment->getNode('localhost');
 
 		// Sync folder from source to localhost
 		$this->rsyncService->sync(
 			// $sourceNode
 			$sourceNode,
 			// $sourcePath
-			$sharedPath,
+			rtrim($sourceNode->getOption('deploymentPath'), '/') . '/' . $relativeSharedPath,
 			// $destinationNode
 			$localhost,
 			// $destinationPath
@@ -78,14 +77,14 @@ class SyncSharedTask extends Task {
 
 		// Sync folder from localhost to target
 		$this->rsyncService->sync(
-		// $sourceNode
+			// $sourceNode
 			$localhost,
 			// $sourcePath
 			$localSharedPath,
 			// $destinationNode
 			$node,
 			// $destinationPath
-			$sharedPath,
+			rtrim($deployment->getApplicationReleasePath($application), '/') . '/' . $relativeSharedPath,
 			$deployment,
 			$options
 		);
@@ -93,22 +92,21 @@ class SyncSharedTask extends Task {
 
 	/**
 	 * @param Node $node
-	 * @param Application $application
 	 * @param Deployment $deployment
 	 * @return string
 	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
 	 */
-	protected function getSharedPathFromNode(Node $node, Application $application, Deployment $deployment) {
+	protected function getRelativeSharedPathFromSourceNode(Node $node, Deployment $deployment) {
 		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
+		$commands[] = 'cd ' . escapeshellarg($node->getOption('deploymentPath'));
 		$commands[] = 'readlink ' . escapeshellarg('fileadmin');
 		$output = $this->shell->execute($commands, $node, $deployment, TRUE);
 		if (!preg_match('/(.+)\/fileadmin\/?$/', trim($output), $matches)) {
 			throw new TaskExecutionException('Could not locate fileadmin. Returned value: ' . $output, 1409077056);
 		}
 		$sharedPath = rtrim($matches[1], '/') . '/';
-		if ($sharedPath{0} !== '/') {
-			$sharedPath = rtrim($deployment->getApplicationReleasePath($application), '/') . '/' . $sharedPath;
+		if ($sharedPath{0} === '/') {
+			throw new TaskExecutionException('Absolute shared path found, but relative path expected: ' . $sharedPath, 1414830078);
 		}
 		return $sharedPath;
 	}

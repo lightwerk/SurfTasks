@@ -80,8 +80,8 @@ class RsyncService {
 		$command[] = $this->getFullPath($sourceNode, $sourcePath);
 		$command[] = $this->getFullPath($destinationNode, $destinationPath);
 
-		$localhost = $deployment->getNode('localhost');
-		$this->shell->executeOrSimulate(implode(' ', $command), $localhost, $deployment);
+		$this->shell->executeOrSimulate('mkdir -p ' . escapeshellarg($destinationPath), $destinationNode, $deployment);
+		$this->shell->executeOrSimulate(implode(' ', $command), $deployment->getNode('localhost'), $deployment);
 	}
 
 	/**
