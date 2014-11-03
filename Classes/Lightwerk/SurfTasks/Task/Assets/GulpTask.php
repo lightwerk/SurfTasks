@@ -57,7 +57,7 @@ class GulpTask extends Task {
 		$commands[] = 'cd ' . escapeshellarg($rootPath);
 		$commands[] = 'if hash npm 2>/dev/null && hash gulp 2>/dev/null && [ -f gulpfile.js ]; then ' .
 			'npm install && ' .
-			'gulp build ' .
+			'gulp build; ' .
 		'fi;';
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
