@@ -41,7 +41,7 @@ class StopOnChangesTask extends Task {
 		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
 		$commands[] = 'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
 			'CHANGES=$( git status --porcelain ); ' .
-			'if [ $CHANGES ]; then ' .
+			'if [ "$CHANGES" ]; then ' .
 				'echo \'Detected changes in the target directory. Deployments are just possible to clean targets!\' 1>&2; ' .
 				'echo $CHANGES 1>&2; ' .
 				'exit 1; ' .

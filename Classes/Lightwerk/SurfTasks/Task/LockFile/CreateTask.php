@@ -40,6 +40,9 @@ class CreateTask extends AbstractTask {
 			'echo ' . escapeshellarg(implode(' | ', $content)) . ' > ' . escapeshellarg($this->getFileName($options))
 		);
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
+
+		$commands[0] = 'cd ' . escapeshellarg(rtrim($deployment->getWorkspacePath($application), '/') . '/' . $this->getTargetPath($options));
+		$this->shell->executeOrSimulate($commands, $deployment->getNode('localhost'), $deployment);
 	}
 
 	/**
@@ -57,6 +60,9 @@ class CreateTask extends AbstractTask {
 			'rm -f ' . escapeshellarg($this->getFileName($options))
 		);
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
+
+		$commands[0] = 'cd ' . escapeshellarg(rtrim($deployment->getWorkspacePath($application), '/') . '/' . $this->getTargetPath($options));
+		$this->shell->executeOrSimulate($commands, $deployment->getNode('localhost'), $deployment);
 	}
 
 }
