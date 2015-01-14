@@ -37,16 +37,19 @@ class StopOnChangesTask extends Task {
 	 * @throws InvalidConfigurationException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-		$commands[] = 'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
-			'CHANGES=$( git status --porcelain ); ' .
-			'if [ "$CHANGES" ]; then ' .
-				'echo \'Detected changes in the target directory. Deployments are just possible to clean targets!\' 1>&2; ' .
-				'echo $CHANGES 1>&2; ' .
-				'exit 1; ' .
-			'fi; ' .
-		'fi;';
+		$commands = array(
+			'if [ -d ' . escapeshellarg($deployment->getApplicationReleasePath($application)) . ' ]; then ' .
+				'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application)) . '; ' .
+				'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
+					'CHANGES=$( git status --porcelain ); ' .
+					'if [ "$CHANGES" ]; then ' .
+						'echo \'Detected changes in the target directory. Deployments are just possible to clean targets!\' 1>&2; ' .
+						'echo $CHANGES 1>&2; ' .
+						'exit 1; ' .
+					'fi; ' .
+				'fi; ' .
+			'fi;'
+		);
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
