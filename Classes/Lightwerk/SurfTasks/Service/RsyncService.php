@@ -39,12 +39,13 @@ class RsyncService {
 		'perms' => TRUE,
 		'links' => TRUE,
 		'delete' => TRUE,
-		'delete-excluded' => TRUE,
+		'delete-excluded' => FALSE,
 		'compress' => TRUE,
 		'verbose' => TRUE,
 		'quiet' => TRUE,
 		'rsh' => 'ssh -p 22 -o BatchMode=yes',
 		'omit-dir-times' => TRUE,
+		'exclude' => array('typo3temp/*'),
 	);
 
 	/**
