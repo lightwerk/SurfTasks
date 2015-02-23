@@ -45,6 +45,7 @@ class RsyncService {
 		'quiet' => TRUE,
 		'rsh' => 'ssh -p 22 -o BatchMode=yes',
 		'omit-dir-times' => TRUE,
+		'include' => array('typo3temp/.gitdummy'),
 		'exclude' => array('typo3temp/*'),
 	);
 
