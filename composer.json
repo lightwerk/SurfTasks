@@ -3,7 +3,7 @@
     "type": "typo3-flow-package",
     "description": "Additional tasks for TYPO3.Surf.",
     "license": ["GPL-3.0+"],
-    "homepage": "https://bitbucket.org/lightwerk/surftasks",
+    "homepage": "https://github.com/lightwerk/SurfTasks",
     "keywords": [
         "TYPO3 Surf",
         "Deployment",
@@ -24,8 +24,8 @@
         }
     ],
     "support": {
-        "issues": "https://bitbucket.org/lightwerk/surftasks/issues",
-        "source": "https://bitbucket.org/lightwerk/surftasks/src"
+        "issues": "https://github.com/lightwerk/SurfTasks/issues",
+        "source": "https://github.com/lightwerk/SurfTasks"
     },
     "require": {
         "typo3/surf": "*"
