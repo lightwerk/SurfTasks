@@ -42,23 +42,37 @@ abstract class AbstractTask extends Task {
 	/**
 	 * @var array
 	 */
-	protected $databaseArguments = array('username', 'password', 'host', 'socket', 'port', 'database');
-
-
+	protected $databaseArguments = array('user', 'password', 'host', 'socket', 'port', 'database');
 
 	/**
-	 * Returns node options
-	 *
 	 * @param Node $node
-	 * @param Application $application
 	 * @param Deployment $deployment
 	 * @param array $options
-	 * @return array
+	 * @return array|mixed
+	 * @throws TaskExecutionException
 	 */
-	protected function getNodeOptions(Node $node, Application $application, Deployment $deployment, array $options) {
-		$options = array_merge($this->options, $node->getOptions());
-		$options = array_merge($options, $this->getCredentials($node, $application, $deployment, $options));
-		return $options;
+	protected function getCredentials(Node $node, Deployment $deployment, array $options) {
+		switch ($options['db']['credentialsSource']) {
+			case 'TYPO3\\CMS':
+				$credentials = $this->getCredentialsFromTypo3Cms($node, $deployment, $options);
+				break;
+			default:
+				$credentials = $options['db'];
+		}
+		return $credentials;
+	}
+
+	/**
+	 * @param array $options 
+	 * @param array $credentials 
+	 * @return string
+	 */
+	protected function getDumpFile($options, $credentials) {
+		if (empty($options['dumpPath']) === FALSE) {
+			return $options['dumpPath'] . '/' . $credentials['database'] . '.sql.gz';
+		} else {
+			return '/tmp/' . $credentials['database'] . '.sql.gz';
+		}
 	}
 
 	/**
@@ -67,38 +81,37 @@ abstract class AbstractTask extends Task {
 	 * @param array $options
 	 * @return string
 	 */
-	protected function getMysqlArguments($options) {
+	protected function getMysqlArguments($credentials, $appendDatabase = TRUE) {
 		$arguments = array();
-
+		$database = '';
 		foreach ($this->databaseArguments as $key) {
-			$key = 'db' . ucfirst($key);
-			if (empty($options[$key])) {
+			if (empty($credentials[$key])) {
 				continue;
 			}
-			$value = escapeshellarg($options[$key]);
-			if (strlen($key) === 1) {
-				$arguments[$key] = '-' . $key . ' ' . $value;
+			$value = escapeshellarg($credentials[$key]);
+			if ($key === 'database') {
+				$database = $value;
 			} else {
 				$arguments[$key] = '--' . $key . '=' . $value;
 			}
 		}
-
-		return implode(' ', $arguments);
+		if ($appendDatabase === TRUE) {
+			return implode(' ', $arguments) . ' ' . $database;
+		} else {
+			return implode(' ', $arguments);
+		}
 	}
 
 	/**
-	 * Get credentials from TYPO3 CMS
-	 *
 	 * @param Node $node
-	 * @param Application $application
 	 * @param Deployment $deployment
 	 * @param array $options
-	 * @return mixed
+	 * @return array
 	 * @throws TaskExecutionException
 	 */
-	protected function getCredentialsFromTypo3Cms(Node $node, Application $application, Deployment $deployment, array $options = array()) {
+	protected function getCredentialsFromTypo3Cms(Node $node, Deployment $deployment, array $options = array()) {
 		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
+		$commands[] = 'cd ' . escapeshellarg($options['deploymentPath']);
 		if (!empty($options['context'])) {
 			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
 		}
@@ -112,30 +125,14 @@ abstract class AbstractTask extends Task {
 
 		$credentials = array();
 		foreach ($returnedOutput as $key => $value) {
-			$newKey = 'db' . ucfirst($key);
-			$credentials[$newKey] = $value;
-		}
-
-		return $credentials;
-	}
-
-	/**
-	 * Returns database credentials
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return array|mixed
-	 * @throws TaskExecutionException
-	 */
-	protected function getCredentials(Node $node, Application $application, Deployment $deployment, array $options) {
-		switch ($options['credentialsSource']) {
-			case 'TYPO3\\CMS':
-				$credentials = $this->getCredentialsFromTypo3Cms($node, $application, $deployment, $options);
-				break;
-			default:
-				$credentials = array();
+			switch ($key) {
+				case 'username':
+					$credentials['user'] = $value;
+					break;
+				default:
+					$credentials[$key] = $value;
+					break;
+			}
 		}
 		return $credentials;
 	}

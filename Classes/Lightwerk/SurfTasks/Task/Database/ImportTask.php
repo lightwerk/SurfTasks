@@ -26,8 +26,6 @@ class ImportTask extends AbstractTask {
 		'truncateTables' => array(
 			// 'tableName' => TRUE,
 		),
-		'sourceFile' => 'mysqldump.sql.gz',
-		'credentialsSource' => 'TYPO3\\CMS',
 	);
 
 	/**
@@ -41,22 +39,22 @@ class ImportTask extends AbstractTask {
 	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$options = $this->getNodeOptions($node, $application, $deployment, $options);
-		$mysqlArguments = $this->getMysqlArguments($options);
-		if (empty($options['deploymentPath'])) {
-			throw new TaskExecutionException('No deploymentPath given in options.', 1409989771);
-		}
+		$options = array_merge_recursive($this->options, $options);
+
+		$credentials = $this->getCredentials($node, $deployment, $options);
+		$dumpFile = $this->getDumpFile($options, $credentials);
+		$mysqlArguments = $this->getMysqlArguments($credentials);
+		$mysqlAuthArguments = $this->getMysqlArguments($credentials, FALSE);
 
 		$commands = array();
-		if (!empty($options['database'])) {
-			$commands[] = 'echo "CREATE DATABASE IF NOT EXISTS ' . escapeshellarg($options['database']) .
-				' DEFAULT CHARACTER SET = \'utf8\'' .
-				' DEFAULT COLLATE \'utf8_general_ci\'"' .
-				' | mysql ' . $mysqlArguments;
+		$commands[] = 'echo "CREATE DATABASE IF NOT EXISTS ' . $credentials['database'] .
+			' DEFAULT CHARACTER SET = \'utf8\'' .
+			' DEFAULT COLLATE \'utf8_general_ci\'"' .
+			' | mysql ' . $mysqlAuthArguments; 
+		$commands[] = 'gzip -d < ' . escapeshellarg($dumpFile) . ' | mysql ' . $mysqlArguments;
+		if (!empty($options['truncateTables']) && is_array($options['truncateTables'])) {
+			$commands[] = $this->getTruncateCommand($mysqlArguments, $options);
 		}
-		$commands[] = 'cd ' . escapeshellarg($options['deploymentPath']);
-		$commands[] = 'gzip -d < ' . escapeshellarg($options['sourceFile']) . ' | mysql ' . $mysqlArguments;
-		$commands[] = $this->getTruncateCommand($mysqlArguments, $options);
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment, FALSE, FALSE);
 	}
@@ -79,11 +77,9 @@ class ImportTask extends AbstractTask {
 	 */
 	protected function getTruncateCommand($mysqlArguments, array $options) {
 		$truncates = array();
-		if (!empty($options['truncateTables']) && is_array($options['truncateTables'])) {
-			foreach ($options['truncateTables'] as $table => $enabled) {
-				if ($enabled) {
-					$truncates = 'TRUNCATE ' . escapeshellarg($table);
-				}
+		foreach ($options['truncateTables'] as $table => $enabled) {
+			if ($enabled) {
+				$truncates = 'TRUNCATE ' . escapeshellarg($table);
 			}
 		}
 

@@ -60,17 +60,9 @@ class SyncSharedTask extends Task {
 		$localhostNode = $deployment->getNode('localhost');
 
 		// Get shared paths
-		$sourceSharedPath = $this->getSharedPathFromNode($sourceNode, $deployment, $options);
-		if ($sourceSharedPath{0} !== '/') {
-			$sourceSharedPath = rtrim($sourceNode->getOption('deploymentPath'), '/') . '/' . $sourceSharedPath;
-		}
-
+		$sourceSharedPath = $this->getSharedPathFromNode($sourceNode, $deployment, $options['sourceNodeOptions']);
 		$localSharedPath = $deployment->getWorkspacePath($application) . '_shared/';
-
 		$destinationSharedPath = $this->getSharedPathFromNode($node, $deployment, $options);
-		if ($destinationSharedPath{0} !== '/') {
-			$destinationSharedPath = rtrim($deployment->getApplicationReleasePath($application), '/') . '/' . $destinationSharedPath;
-		}
 
 		// Sync folder from source to localhost
 		$this->rsyncService->sync(
@@ -124,10 +116,14 @@ class SyncSharedTask extends Task {
 			$commands[] = 'cd ' . escapeshellarg($deploymentPath);
 			$commands[] = 'readlink ' . escapeshellarg('fileadmin');
 			$output = $this->shell->execute($commands, $node, $deployment, TRUE);
-			if (!preg_match('/(.+)\/fileadmin\/?$/', trim($output), $matches)) {
-				throw new TaskExecutionException('Could not locate fileadmin. Returned value: ' . $output, 1409077056);
+			if (preg_match('/(.+)\/fileadmin\/?$/', trim($output), $matches)) {
+				$sharedPath = $matches[1];
+			} else {
+				$sharedPath = str_replace('htdocs', 'shared', $deploymentPath);
 			}
-			$sharedPath = $matches[1];
+		}
+		if ($sharedPath{0} !== '/') {
+			$sharedPath = rtrim($deploymentPath, '/') . '/' . $sharedPath;
 		}
 		return rtrim($sharedPath, '/') . '/';
 	}
