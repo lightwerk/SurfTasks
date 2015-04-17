@@ -41,9 +41,8 @@ class DumpTask extends AbstractTask {
 			'tx_l10nmgr_index' => TRUE,
 			'tx_solr_%' => TRUE,
 		),
-		'targetFile' => 'mysqldump.sql.gz',
+		'dumpPath' => '',
 		'fullDump' => FALSE,
-		'credentialsSource' => 'TYPO3\\CMS',
 	);
 
 	/**
@@ -55,21 +54,22 @@ class DumpTask extends AbstractTask {
 	 * @throws \TYPO3\Surf\Exception\InvalidConfigurationException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$node = $this->getSourceNode($options);
-		$options = $this->getNodeOptions($node, $application, $deployment, $options);
 
-		$mysqlArguments = $this->getMysqlArguments($options);
-		$tableLikes = $this->getTableLikes($options);
-		if (empty($options['deploymentPath'])) {
-			throw new TaskExecutionException('No deploymentPath given in options.', 1409989771);
+		if (empty($options['sourceNode']) === FALSE) {
+			$node = $this->nodeFactory->getNodeByArray($options['sourceNode']);
+			$options = $options['sourceNodeOptions'];
 		}
+		$options = array_merge_recursive($this->options, $options);
 
-		$commands = array(
-			'cd ' . escapeshellarg($options['deploymentPath']),
-			': > ' . $options['targetFile'],
-			$this->getStructureCommand($mysqlArguments, $tableLikes, $options['targetFile']),
-			$this->getDataTablesCommand($mysqlArguments, $tableLikes, $options['targetFile']),
-		);
+		$credentials = $this->getCredentials($node, $deployment, $options);
+		$mysqlArguments = $this->getMysqlArguments($credentials);
+		$tableLikes = $this->getTableLikes($options, $credentials);
+		$dumpFile = $this->getDumpFile($options, $credentials);
+
+		$commands = array($this->getDataTablesCommand($mysqlArguments, $tableLikes, $dumpFile));
+		if (empty($tableLikes) === FALSE) {
+			$commands[] = $this->getStructureCommand($mysqlArguments, $tableLikes, $dumpFile);
+		}
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment, FALSE, FALSE);
 	}
@@ -87,23 +87,10 @@ class DumpTask extends AbstractTask {
 
 	/**
 	 * @param array $options
-	 * @return Node
-	 * @throws InvalidConfigurationException
-	 * @throws \Lightwerk\SurfRunner\Factory\Exception
-	 */
-	protected function getSourceNode($options) {
-		if (empty($options['sourceNode']) || !is_array($options['sourceNode'])) {
-			throw new InvalidConfigurationException('Node "sourceNode" not found', 1408441582);
-		}
-		return $this->nodeFactory->getNodeByArray($options['sourceNode']);
-	}
-
-	/**
-	 * @param array $options
 	 * @return array
 	 */
-	protected function getTableLikes($options) {
-		if (empty($mysqlOptions['fullDump']) && !empty($mysqlOptions['ignoreTables'])) {
+	protected function getTableLikes($options, $credentials) {
+		if ($options['fullDump'] === TRUE || empty($options['ignoreTables']) === TRUE) {
 			return array();
 		}
 		$tablesLike = array();
@@ -111,7 +98,7 @@ class DumpTask extends AbstractTask {
 			if (!$enabled) {
 				continue;
 			}
-			$tablesLike[] = 'Tables_in_' . $options['dbDatabase'] . ' LIKE ' . escapeshellarg($table);
+			$tablesLike[] = 'Tables_in_' . $credentials['database'] . ' LIKE ' . escapeshellarg($table);
 		}
 		return $tablesLike;
 	}
@@ -123,14 +110,14 @@ class DumpTask extends AbstractTask {
 	 * @return string
 	 */
 	protected function getDataTablesCommand($mysqlArguments, $tableLikes,  $targetFile) {
-		if (!empty($tableLikes)) {
+		if (empty($tableLikes) === FALSE) {
 			$dataTables = ' `mysql -N ' . $mysqlArguments . ' -e "SHOW TABLES WHERE NOT (' . implode(' OR ', $tableLikes) . ')" | awk \'{printf $1" "}\'`';
 		} else {
 			$dataTables = '';
 		}
 
-		return 'mysqldump --single-transaction ' . $mysqlArguments . $dataTables .
-			' | gzip >> ' . $targetFile;
+		return 'mysqldump --single-transaction ' . $mysqlArguments . ' ' . $dataTables .
+			' | gzip > ' . $targetFile;
 	}
 
 	/**
@@ -140,9 +127,9 @@ class DumpTask extends AbstractTask {
 	 * @return string
 	 */
 	protected function getStructureCommand($mysqlArguments, $tableLikes,  $targetFile) {
-		$structureTables = '`mysql -N ' . $mysqlArguments . ' -e "SHOW TABLES WHERE (' . implode(' OR ', $tableLikes) . ')" | awk \'{printf $1" "}\'`';
+		$dataTables = ' `mysql -N ' . $mysqlArguments . ' -e "SHOW TABLES WHERE (' . implode(' OR ', $tableLikes) . ')" | awk \'{printf $1" "}\'`';
 
-		return 'mysqldump --no-data --single-transaction ' . $mysqlArguments . ' --skip-add-drop-table ' . $structureTables .
+		return 'mysqldump --no-data --single-transaction ' . $mysqlArguments . ' --skip-add-drop-table ' . $dataTables . 
 			' | sed "s/^CREATE TABLE/CREATE TABLE IF NOT EXISTS/g"' .
 			' | gzip >> ' . $targetFile;
 	}

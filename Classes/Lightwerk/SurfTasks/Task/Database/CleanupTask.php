@@ -19,7 +19,7 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
  *
  * @package Lightwerk\SurfTasks
  */
-class TransferTask extends AbstractTask {
+class CleanupTask extends AbstractTask {
 
 	/**
 	 * @Flow\Inject
@@ -50,19 +50,14 @@ class TransferTask extends AbstractTask {
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
 		$credentials = $this->getCredentials($sourceNode, $deployment, $options['sourceNodeOptions']);
 		$dumpFile = $this->getDumpFile($options['sourceNodeOptions'], $credentials);
-		$source = $this->getArgument($sourceNode, $application, $dumpFile);
+		$this->shell->executeOrSimulate('rm ' . $dumpFile, $sourceNode, $deployment);
 
 		$credentials = $this->getCredentials($node, $deployment, $options);
 		$dumpFile = $this->getDumpFile($options, $credentials);
-		$target = $this->getArgument($node, $application, $dumpFile);
-
-		$command = 'scp -o BatchMode=\'yes\' ' . $source . ' ' . $target;
-		$this->shell->executeOrSimulate($command, $node, $deployment);
+		$this->shell->executeOrSimulate('rm ' . $dumpFile, $node, $deployment);
 	}
 
 	/**
-	 * Simulate this task
-	 *
 	 * @param Node $node
 	 * @param Application $application
 	 * @param Deployment $deployment
@@ -71,25 +66,5 @@ class TransferTask extends AbstractTask {
 	 */
 	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$this->execute($node, $application, $deployment, $options);
-	}
-
-	/**
-	 * @param Node $node
-	 * @param Application $application
-	 * @param string $file
-	 * @return string
-	 */
-	protected function getArgument(Node $node, Application $application, $file) {
-		$argument = '';
-		if ($node->hasOption('username')) {
-			$username = $node->getOption('username');
-			if (!empty($username)) {
-				$argument .= $username . '@';
-			}
-		}
-
-		$argument .= $node->getHostname() . ':';
-		$argument .= $file;
-		return $argument;
 	}
 }
