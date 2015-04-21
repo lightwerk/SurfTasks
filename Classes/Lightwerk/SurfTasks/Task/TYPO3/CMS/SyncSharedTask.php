@@ -56,38 +56,40 @@ class SyncSharedTask extends Task {
 			throw new TaskExecutionException('No sourceNode given in options.', 1409078366);
 		}
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
-
-		$localhostNode = $deployment->getNode('localhost');
+		$localNode = $deployment->getNode('localhost');
+		$targetNode = $node;
 
 		// Get shared paths
 		$sourceSharedPath = $this->getSharedPathFromNode($sourceNode, $deployment, $options['sourceNodeOptions']);
 		$localSharedPath = $deployment->getWorkspacePath($application) . '_shared/';
-		$destinationSharedPath = $this->getSharedPathFromNode($node, $deployment, $options);
+		$targetSharedPath = $this->getSharedPathFromNode($node, $deployment, $options);
 
-		// Sync folder from source to localhost
+		// maybe we should change this behaviour ...
+		if ($targetNode->isLocalhost() === TRUE) {
+			// sync direct
+			$this->sync($sourceNode, $sourceSharedPath, $targetNode, $targetSharedPath, $deployment, $options);
+		} else {
+			// cached
+			$this->sync($sourceNode, $sourceSharedPath, $localNode, $localSharedPath, $deployment, $options);
+			$this->sync($localNode, $localSharedPath, $targetNode, $targetSharedPath, $deployment, $options);
+		}
+	}
+
+	/**
+	 * @param Node $sourceNode 
+	 * @param string $sourcePath 
+	 * @param Node $targetNode 
+	 * @param string $targetPath 
+	 * @param Deployment $deployment 
+	 * @param array $options 
+	 * @return void
+	 */
+	protected function sync(Node $sourceNode, $sourcePath, Node $targetNode, $targetPath, Deployment $deployment, array $options = array()) {
 		$this->rsyncService->sync(
-			// $sourceNode
 			$sourceNode,
-			// $sourcePath
-			$sourceSharedPath,
-			// $destinationNode
-			$localhostNode,
-			// $destinationPath
-			$localSharedPath,
-			$deployment,
-			$options
-		);
-
-		// Sync folder from localhost to target
-		$this->rsyncService->sync(
-			// $sourceNode
-			$localhostNode,
-			// $sourcePath
-			$localSharedPath,
-			// $destinationNode
-			$node,
-			// $destinationPath
-			$destinationSharedPath,
+			$sourcePath,
+			$targetNode,
+			$targetPath,
 			$deployment,
 			$options
 		);
