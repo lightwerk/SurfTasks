@@ -52,12 +52,19 @@ abstract class AbstractTask extends Task {
 	 * @throws TaskExecutionException
 	 */
 	protected function getCredentials(Node $node, Deployment $deployment, array $options) {
-		switch ($options['db']['credentialsSource']) {
-			case 'TYPO3\\CMS':
-				$credentials = $this->getCredentialsFromTypo3Cms($node, $deployment, $options);
-				break;
-			default:
-				$credentials = $options['db'];
+		if (empty($options['db']) === TRUE) {
+			throw new TaskExecutionException('db is not configured', 1429628542);
+		}
+		if (empty($options['db']['credentialsSource']) === FALSE) {
+			switch ($options['db']['credentialsSource']) {
+				case 'TYPO3\\CMS':
+					$credentials = $this->getCredentialsFromTypo3Cms($node, $deployment, $options);
+					break;
+				default:
+					throw new TaskExecutionException('unknown credentialsSource', 1429628543);
+			}
+		} else {
+			$credentials = $options['db'];
 		}
 		return $credentials;
 	}
