@@ -45,8 +45,8 @@ class RsyncService {
 		'quiet' => TRUE,
 		'rsh' => 'ssh -p 22 -o BatchMode=yes',
 		'omit-dir-times' => TRUE,
-		'include' => array('typo3temp/.gitdummy'),
-		'exclude' => array('typo3temp/*'),
+		'include' => array(),
+		'exclude' => array(),
 	);
 
 	/**
@@ -126,7 +126,7 @@ class RsyncService {
 		$flags = array();
 
 		if (isset($options['rsyncFlags']) && is_array($options['rsyncFlags'])) {
-			$flagOptions = array_merge($flags, $options['rsyncFlags']);
+			$flagOptions = array_merge($flagOptions, $options['rsyncFlags']);
 		}
 
 		foreach ($flagOptions as $key => $value) {
