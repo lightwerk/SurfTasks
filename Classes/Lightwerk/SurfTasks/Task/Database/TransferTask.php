@@ -45,7 +45,6 @@ class TransferTask extends AbstractTask {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$options = array_merge_recursive($this->options, $options);
 
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
 		$credentials = $this->getCredentials($sourceNode, $deployment, $options['sourceNodeOptions']);

@@ -60,13 +60,10 @@ class CopyMysqlDumpTask extends Task {
 		}
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
 
-		$scpOptions = array_merge_recursive(
-			$this->options,
-			!empty($options['scp']) ? $options['scp'] : array()
-		);
+		$options = array_replace_recursive($this->options, $options);
 
-		$source = $this->getArgument($sourceNode, $application, $scpOptions['sourcePath'], $scpOptions['sourceFile']);
-		$target = $this->getArgument($node, $application, $scpOptions['targetPath'], $scpOptions['targetFile']);
+		$source = $this->getArgument($sourceNode, $application, $options['sourcePath'], $options['sourceFile']);
+		$target = $this->getArgument($node, $application, $options['targetPath'], $options['targetFile']);
 		$command = 'scp -o BatchMode=\'yes\' ' . $source . ' ' . $target;
 
 		$this->shell->executeOrSimulate($command, $node, $deployment);

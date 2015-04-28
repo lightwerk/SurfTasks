@@ -39,7 +39,7 @@ class ImportTask extends AbstractTask {
 	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$options = array_merge_recursive($this->options, $options);
+		$options = array_replace_recursive($this->options, $options);
 
 		$credentials = $this->getCredentials($node, $deployment, $options);
 		$dumpFile = $this->getDumpFile($options, $credentials);
