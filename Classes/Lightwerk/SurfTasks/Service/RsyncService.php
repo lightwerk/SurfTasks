@@ -60,12 +60,15 @@ class RsyncService {
 	 * @throws \TYPO3\Surf\Exception\InvalidConfigurationException
 	 */
 	public function sync(Node $sourceNode, $sourcePath, Node $destinationNode, $destinationPath, Deployment $deployment, $options) {
-		$flagOptions = $this->flags;
+
+		// first override $this->flags with $options['rsyncFlags']
+		$flagOptions = array_replace_recursive($this->flags, $options['rsyncFlags']);
 
 		if ($sourceNode->isLocalhost() === FALSE && $destinationNode->isLocalhost()  === FALSE) {
 			throw new InvalidConfigurationException('Just one external host is allowed!', 1408805638);
 		}
 
+		// override $flagOptions
 		$externalNode = $this->getFirstExternalNode($sourceNode, $destinationNode);
 		if ($externalNode instanceof Node && $externalNode->hasOption('port')) {
 			$flagOptions['rsh'] = 'ssh -p ' . (int) $externalNode->getOption('port') . ' -o BatchMode=yes';
@@ -78,7 +81,7 @@ class RsyncService {
 			}
 		}
 
-		$command = array_merge(array($this->rsyncCommand), $this->getFlags($options, $flagOptions));
+		$command = array_merge(array($this->rsyncCommand), $this->getFlags($flagOptions));
 		$command[] = $this->getFullPath($sourceNode, $sourcePath);
 		$command[] = $this->getFullPath($destinationNode, $destinationPath);
 
@@ -118,16 +121,11 @@ class RsyncService {
 	}
 
 	/**
-	 * @param array $options
 	 * @param array $flagOptions
 	 * @return array
 	 */
-	protected function getFlags($options, $flagOptions) {
+	protected function getFlags($flagOptions) {
 		$flags = array();
-
-		if (isset($options['rsyncFlags']) && is_array($options['rsyncFlags'])) {
-			$flagOptions = array_merge($flagOptions, $options['rsyncFlags']);
-		}
 
 		foreach ($flagOptions as $key => $value) {
 			$prefix = strlen($key) === 1 ? '-' : '--';
