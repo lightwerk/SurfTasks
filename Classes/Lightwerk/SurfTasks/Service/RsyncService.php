@@ -62,7 +62,11 @@ class RsyncService {
 	public function sync(Node $sourceNode, $sourcePath, Node $destinationNode, $destinationPath, Deployment $deployment, $options) {
 
 		// first override $this->flags with $options['rsyncFlags']
-		$flagOptions = array_replace_recursive($this->flags, $options['rsyncFlags']);
+		if (empty($options['rsyncFlags']) === FALSE) {
+			$flagOptions = array_replace_recursive($this->flags, $options['rsyncFlags']);
+		} else {
+			$flagOptions = $this->flags;
+		}
 
 		if ($sourceNode->isLocalhost() === FALSE && $destinationNode->isLocalhost()  === FALSE) {
 			throw new InvalidConfigurationException('Just one external host is allowed!', 1408805638);
