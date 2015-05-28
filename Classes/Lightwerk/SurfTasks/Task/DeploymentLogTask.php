@@ -35,6 +35,28 @@ class DeploymentLogTask extends Task {
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
+		$targetPath = isset($options['deploymentLogTargetPath']) ? $options['deploymentLogTargetPath'] : '.';
+		$fileName = !empty($options['deploymentLogFileName']) ? $options['deploymentLogFileName'] : 'deployment.log';
+		$optionsToLog = !empty($options['deploymentLogOptions']) ? $options['deploymentLogOptions'] : array('tag', 'branch', 'sha1');
+
+		$logContent = array(
+			date('Y-m-d H:i:s (D)'),
+			'Application: ' . $application->getName(),
+			'Deployment: ' . $deployment->getName(),
+			'Status: ' . $deployment->getStatus(),
+		);
+
+		foreach ($optionsToLog as $key) {
+			if (!empty($options[$key])) {
+				$logContent[] = $key . ' = ' . $options[$key];
+			}
+		}
+
+		$commands = array(
+			'cd ' . escapeshellarg($application->getReleasesPath()),
+			'echo ' . escapeshellarg(implode(' | ', $logContent)) . ' >> ' . rtrim($targetPath, '/') . '/' . $fileName
+		);
+		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
 
 	/**

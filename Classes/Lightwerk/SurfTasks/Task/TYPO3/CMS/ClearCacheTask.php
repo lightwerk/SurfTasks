@@ -40,7 +40,7 @@ class ClearCacheTask extends Task {
 			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
 		}
 		$commands[] = 'if [ -d "typo3conf/ext/coreapi" ]; then ' .
-			'typo3/cli_dispatch.phpsh extbase cacheapi:clearallcaches; ' .
+			'typo3/cli_dispatch.phpsh extbase cacheapi:clearallcaches -hard true; ' .
 		'fi';
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
