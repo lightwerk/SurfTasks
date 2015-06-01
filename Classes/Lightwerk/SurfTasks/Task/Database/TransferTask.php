@@ -49,11 +49,11 @@ class TransferTask extends AbstractTask {
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
 		$credentials = $this->getCredentials($sourceNode, $deployment, $options['sourceNodeOptions']);
 		$dumpFile = $this->getDumpFile($options['sourceNodeOptions'], $credentials);
-		$source = $this->getArgument($sourceNode, $application, $dumpFile);
+		$source = $this->getArgument($sourceNode, $dumpFile);
 
 		$credentials = $this->getCredentials($node, $deployment, $options);
 		$dumpFile = $this->getDumpFile($options, $credentials);
-		$target = $this->getArgument($node, $application, $dumpFile);
+		$target = $this->getArgument($node, $dumpFile);
 
 		$command = 'scp -o BatchMode=\'yes\' ' . $source . ' ' . $target;
 		$this->shell->executeOrSimulate($command, $node, $deployment);
@@ -74,11 +74,13 @@ class TransferTask extends AbstractTask {
 
 	/**
 	 * @param Node $node
-	 * @param Application $application
 	 * @param string $file
 	 * @return string
 	 */
-	protected function getArgument(Node $node, Application $application, $file) {
+	protected function getArgument(Node $node, $file) {
+		if ($node->isLocalhost() === TRUE) {
+			return $file;
+		}
 		$argument = '';
 		if ($node->hasOption('username')) {
 			$username = $node->getOption('username');
@@ -86,7 +88,6 @@ class TransferTask extends AbstractTask {
 				$argument .= $username . '@';
 			}
 		}
-
 		$argument .= $node->getHostname() . ':';
 		$argument .= $file;
 		return $argument;
