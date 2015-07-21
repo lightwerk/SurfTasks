@@ -10,6 +10,7 @@ use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * Create a temporary file named SURFCAPTAIN_DEPLOYMENT_IS_RUNNING
@@ -27,6 +28,7 @@ class CreateTask extends AbstractTask {
 	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
 	 * @param array $options
 	 * @return void
+	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$content = array(
@@ -83,6 +85,7 @@ class CreateTask extends AbstractTask {
 	 * @param Node $node
 	 * @param Deployment $deployment
 	 * @param array $options
+	 * @throws TaskExecutionException
 	 */
 	protected function createFile($directoryPath, $content, Node $node, Deployment $deployment, array $options) {
 		$commands = array(
@@ -98,6 +101,7 @@ class CreateTask extends AbstractTask {
 	 * @param Node $node
 	 * @param Deployment $deployment
 	 * @param array $options
+	 * @throws TaskExecutionException
 	 */
 	protected function removeFile($directoryPath, Node $node, Deployment $deployment, array $options) {
 		$commands = array(

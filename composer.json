@@ -9,6 +9,9 @@
         "Deployment",
         "Tasks"
     ],
+    "require": {
+      "typo3/surf": "*"
+    },
     "authors": [
         {
             "name": "Daniel Goerz",

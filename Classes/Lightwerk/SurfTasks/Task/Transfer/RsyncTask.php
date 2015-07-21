@@ -12,6 +12,8 @@ use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
+use TYPO3\Surf\Exception\TaskExecutionException;
+use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
  * Rsync Task
@@ -40,6 +42,8 @@ class RsyncTask extends Task {
 	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
 	 * @param array $options
 	 * @return void
+	 * @throws InvalidConfigurationException
+	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		// Sync files

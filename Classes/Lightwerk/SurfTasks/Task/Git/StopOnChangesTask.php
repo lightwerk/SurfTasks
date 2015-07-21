@@ -12,6 +12,7 @@ use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * Stops the deployment when "git status" shows changes
@@ -35,6 +36,7 @@ class StopOnChangesTask extends Task {
 	 * @param array $options
 	 * @return void
 	 * @throws InvalidConfigurationException
+	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$commands = array(

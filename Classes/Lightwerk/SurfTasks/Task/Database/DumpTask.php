@@ -51,7 +51,7 @@ class DumpTask extends AbstractTask {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @throws TaskExecutionException
-	 * @throws \TYPO3\Surf\Exception\InvalidConfigurationException
+	 * @throws InvalidConfigurationException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 

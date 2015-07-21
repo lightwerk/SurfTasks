@@ -6,7 +6,7 @@ namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
  *                                                                        *
  *                                                                        */
 
-use Lightwerk\SurfRunner\Factory\NodeFactory;
+use Lightwerk\SurfTasks\Factory\NodeFactory;
 use Lightwerk\SurfTasks\Service\RsyncService;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Application;
@@ -14,6 +14,7 @@ use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\TaskExecutionException;
+use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
  * Rsync Task
@@ -46,14 +47,13 @@ class SyncSharedTask extends Task {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return void
-	 * @throws \Lightwerk\SurfRunner\Factory\Exception
-	 * @throws \TYPO3\Surf\Exception\InvalidConfigurationException
-	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
+	 * @throws InvalidConfigurationException
+	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		// Get nodes
 		if (empty($options['sourceNode']) || !is_array($options['sourceNode'])) {
-			throw new TaskExecutionException('No sourceNode given in options.', 1409078366);
+			throw new InvalidConfigurationException('No sourceNode given in options.', 1409078366);
 		}
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
 		$localNode = $deployment->getNode('localhost');
@@ -100,7 +100,8 @@ class SyncSharedTask extends Task {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return string
-	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
+	 * @throws InvalidConfigurationException
+	 * @throws TaskExecutionException
 	 */
 	protected function getSharedPathFromNode(Node $node, Deployment $deployment, $options) {
 		if ($node->hasOption('sharedPath')) {
@@ -111,7 +112,7 @@ class SyncSharedTask extends Task {
 			} elseif (!empty($options['deploymentPath'])) {
 				$deploymentPath = $options['deploymentPath'];
 			} else {
-				throw new TaskExecutionException('No deploymentPath defined!', 1414849872);
+				throw new InvalidConfigurationException('No deploymentPath defined!', 1414849872);
 			}
 
 			$commands = array();

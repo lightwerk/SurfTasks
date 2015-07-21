@@ -10,6 +10,7 @@ use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * Rsync Service
@@ -57,7 +58,8 @@ class RsyncService {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return void
-	 * @throws \TYPO3\Surf\Exception\InvalidConfigurationException
+	 * @throws InvalidConfigurationException
+	 * @throws TaskExecutionException
 	 */
 	public function sync(Node $sourceNode, $sourcePath, Node $destinationNode, $destinationPath, Deployment $deployment, $options) {
 

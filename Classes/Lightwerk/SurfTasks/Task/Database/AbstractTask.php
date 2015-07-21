@@ -6,7 +6,7 @@ namespace Lightwerk\SurfTasks\Task\Database;
  *                                                                        *
  *                                                                        */
 
-use Lightwerk\SurfRunner\Factory\NodeFactory;
+use Lightwerk\SurfTasks\Factory\NodeFactory;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
@@ -50,10 +50,11 @@ abstract class AbstractTask extends Task {
 	 * @param array $options
 	 * @return array|mixed
 	 * @throws TaskExecutionException
+	 * @throws InvalidConfigurationException
 	 */
 	protected function getCredentials(Node $node, Deployment $deployment, array $options) {
 		if (empty($options['db']) === TRUE) {
-			throw new TaskExecutionException('db is not configured', 1429628542);
+			throw new InvalidConfigurationException('db is not configured', 1429628542);
 		}
 		if (empty($options['db']['credentialsSource']) === FALSE) {
 			switch ($options['db']['credentialsSource']) {
@@ -61,7 +62,7 @@ abstract class AbstractTask extends Task {
 					$credentials = $this->getCredentialsFromTypo3Cms($node, $deployment, $options);
 					break;
 				default:
-					throw new TaskExecutionException('unknown credentialsSource', 1429628543);
+					throw new InvalidConfigurationException('unknown credentialsSource', 1429628543);
 			}
 		} else {
 			$credentials = $options['db'];
