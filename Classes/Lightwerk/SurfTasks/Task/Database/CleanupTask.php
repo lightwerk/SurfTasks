@@ -6,13 +6,13 @@ namespace Lightwerk\SurfTasks\Task\Database;
  *                                                                        *
  *                                                                        */
 
-use Lightwerk\SurfRunner\Factory\NodeFactory;
-use Lightwerk\SurfTasks\Task\Database\AbstractTask;
+use Lightwerk\SurfTasks\Factory\NodeFactory;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * Database Dump Transfer Task
@@ -22,18 +22,6 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
 class CleanupTask extends AbstractTask {
 
 	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-	 */
-	protected $shell;
-
-	/**
-	 * @Flow\Inject
-	 * @var NodeFactory
-	 */
-	protected $nodeFactory;
-
-	/**
 	 * Executes the task
 	 *
 	 * @param Node $node
@@ -41,7 +29,7 @@ class CleanupTask extends AbstractTask {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @throws InvalidConfigurationException
-	 * @throws \Lightwerk\SurfRunner\Factory\Exception
+	 * @throws TaskExecutionException
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {

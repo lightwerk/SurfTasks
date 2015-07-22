@@ -12,6 +12,7 @@ use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * Tags the deployed commit with the node name
@@ -41,6 +42,7 @@ class TagNodeDeploymentTask extends Task {
 	 * @param array $options
 	 * @return void
 	 * @throws InvalidConfigurationException
+	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		if (!empty($options['disableDeploymentTag'])) {

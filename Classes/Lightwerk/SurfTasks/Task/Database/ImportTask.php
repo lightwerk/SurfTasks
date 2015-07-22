@@ -11,6 +11,7 @@ use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Exception\TaskExecutionException;
+use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
  * MySQL Import Task
@@ -34,9 +35,8 @@ class ImportTask extends AbstractTask {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return void
-	 * @throws \Lightwerk\SurfRunner\Factory\Exception
-	 * @throws \TYPO3\Surf\Exception\InvalidConfigurationException
-	 * @throws \TYPO3\Surf\Exception\TaskExecutionException
+	 * @throws InvalidConfigurationException
+	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$options = array_replace_recursive($this->options, $options);

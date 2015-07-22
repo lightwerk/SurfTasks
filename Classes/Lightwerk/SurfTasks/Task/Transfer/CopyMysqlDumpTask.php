@@ -6,12 +6,13 @@ namespace Lightwerk\SurfTasks\Task\Transfer;
  *                                                                        *
  *                                                                        */
 
-use Lightwerk\SurfRunner\Factory\NodeFactory;
+use Lightwerk\SurfTasks\Factory\NodeFactory;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
+use TYPO3\Surf\Exception\TaskExecutionException;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
@@ -51,7 +52,7 @@ class CopyMysqlDumpTask extends Task {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @throws InvalidConfigurationException
-	 * @throws \Lightwerk\SurfRunner\Factory\Exception
+	 * @throws TaskExecutionException
 	 * @return void
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {

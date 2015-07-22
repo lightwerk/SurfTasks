@@ -10,6 +10,7 @@ use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * @package Lightwerk\SurfTasks
@@ -31,6 +32,7 @@ class WarmupCacheTask extends Task {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return void
+	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$targetPath = $deployment->getApplicationReleasePath($application);

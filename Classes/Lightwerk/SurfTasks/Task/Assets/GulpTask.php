@@ -12,6 +12,7 @@ use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * Runs gulp tasks
@@ -35,6 +36,7 @@ class GulpTask extends Task {
 	 * @param array $options
 	 * @return void
 	 * @throws InvalidConfigurationException
+	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		if (isset($options['useApplicationWorkspace']) && $options['useApplicationWorkspace'] === TRUE) {
