@@ -43,7 +43,11 @@ class TransferTask extends AbstractTask {
 		$target = $this->getArgument($node, $dumpFile);
 
 		$command = 'scp -o BatchMode=\'yes\' ' . $source . ' ' . $target;
-		$this->shell->executeOrSimulate($command, $node, $deployment);
+		if ($sourceNode->isLocalhost() === TRUE) {
+			$this->shell->executeOrSimulate($command, $sourceNode, $deployment);
+		} else {
+			$this->shell->executeOrSimulate($command, $node, $deployment);
+		}
 	}
 
 	/**
@@ -69,6 +73,14 @@ class TransferTask extends AbstractTask {
 			return $file;
 		}
 		$argument = '';
+
+		if ($node->hasOption('port')) {
+			$port = $node->getOption('port');
+			if (!empty($port)) {
+				$argument .= '-P ' . $port . ' ';
+			}
+		}
+
 		if ($node->hasOption('username')) {
 			$username = $node->getOption('username');
 			if (!empty($username)) {

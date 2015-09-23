@@ -40,6 +40,7 @@ class DumpTask extends AbstractTask {
 			'tx_extensionmanager_domain_model_extension' => TRUE,
 			'tx_l10nmgr_index' => TRUE,
 			'tx_solr_%' => TRUE,
+			'tx_realurl_%' => TRUE
 		),
 		'dumpPath' => '',
 		'fullDump' => FALSE,

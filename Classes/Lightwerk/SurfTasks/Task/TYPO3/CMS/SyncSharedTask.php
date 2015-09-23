@@ -65,7 +65,7 @@ class SyncSharedTask extends Task {
 		$targetSharedPath = $this->getSharedPathFromNode($node, $deployment, $options);
 
 		// maybe we should change this behaviour ...
-		if ($targetNode->isLocalhost() === TRUE) {
+		if ($targetNode->isLocalhost() === TRUE || $sourceNode->isLocalhost() === TRUE) {
 			// sync direct
 			$this->sync($sourceNode, $sourceSharedPath, $targetNode, $targetSharedPath, $deployment, $options);
 		} else {
