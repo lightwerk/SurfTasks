@@ -2,8 +2,7 @@
 namespace Lightwerk\SurfTasks\Task\Assets;
 
 /*                                                                        *
- * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTasks".   *
- *                                                                        *
+ * This script belongs to the TYPO3 Flow package "TYPO3.Surf".            *
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow;
@@ -11,15 +10,13 @@ use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
-use TYPO3\Surf\Exception\InvalidConfigurationException;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * Runs gulp tasks
- *
+ * @author Achim Fritz <af@lightwerk.com>
  * @package Lightwerk\SurfTasks
  */
-class GulpTask extends Task {
+class GruntTask extends Task {
 
 	/**
 	 * @Flow\Inject
@@ -35,10 +32,10 @@ class GulpTask extends Task {
 	 * @param Deployment $deployment
 	 * @param array $options
 	 * @return void
-	 * @throws InvalidConfigurationException
 	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
+
 		if (isset($options['useApplicationWorkspace']) && $options['useApplicationWorkspace'] === TRUE) {
 			$rootPath = $deployment->getWorkspacePath($application);
 		} else {
@@ -57,12 +54,11 @@ class GulpTask extends Task {
 				);
 			}
 		}
-
 		$commands = array();
 		$commands[] = 'cd ' . escapeshellarg($rootPath);
-		$commands[] = 'if hash gulp 2>/dev/null && [ -f gulpfile.js ]; then ' .
-			'gulp build; ' .
-		'fi;';
+		$commands[] = 'if [ "`which grunt`" != "" ] && [ -f "Gruntfile.js" ]; then ' .
+			'grunt build; ' .
+		'fi';
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
@@ -79,5 +75,4 @@ class GulpTask extends Task {
 	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$this->execute($node, $application, $deployment, $options);
 	}
-
 }
