@@ -58,7 +58,7 @@ class NpmTask extends Task {
 		$commands = array();
 		$commands[] = 'cd ' . escapeshellarg($rootPath);
 		$commands[] = 'if [ "`which npm`" != "" ] && [ -f "package.json" ]; then ' .
-			'npm install; ' .
+			'npm install --loglevel error; ' .
 		'fi';
 
 		$this->shell->executeOrSimulate($commands, $node, $deployment);
