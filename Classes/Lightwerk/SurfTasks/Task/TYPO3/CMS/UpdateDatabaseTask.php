@@ -9,7 +9,6 @@ use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
-use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
@@ -17,7 +16,7 @@ use TYPO3\Surf\Exception\TaskExecutionException;
  *
  * @package Lightwerk\SurfTasks
  */
-class UpdateDatabaseTask extends Task {
+class UpdateDatabaseTask extends ExtbaseCommandTask {
 
 	/**
 	 * @Flow\Inject
@@ -46,17 +45,10 @@ class UpdateDatabaseTask extends Task {
 		//   7 = ACTION_REMOVE_CHANGE_TABLE
 		//   8 = ACTION_REMOVE_DROP_TABLE
 		$actions = !empty($options['updateDatabaseActions']) ? $options['updateDatabaseActions'] : '1,2,3,4';
-
-		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-		if (!empty($options['context'])) {
-			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
+		$commands = $this->buildCommands($deployment, $application, 'coreapi', 'databaseapi:databasecompare ' . escapeshellarg($actions), $options);
+		if (count($commands) > 0) {
+			$this->shell->executeOrSimulate($commands, $node, $deployment);
 		}
-		$commands[] = 'if [ -d "typo3conf/ext/coreapi" ]; then ' .
-			'typo3/cli_dispatch.phpsh extbase databaseapi:databasecompare ' . escapeshellarg($actions) . '; ' .
-			'fi';
-
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
 
 	/**

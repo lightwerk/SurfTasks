@@ -9,7 +9,6 @@ use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
-use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
@@ -17,7 +16,7 @@ use TYPO3\Surf\Exception\TaskExecutionException;
  *
  * @package Lightwerk\SurfTasks
  */
-class ClearCacheTask extends Task {
+class ClearCacheTask extends ExtbaseCommandTask {
 
 	/**
 	 * @Flow\Inject
@@ -36,16 +35,10 @@ class ClearCacheTask extends Task {
 	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-		if (!empty($options['context'])) {
-			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
+		$commands = $this->buildCommands($deployment, $application, 'coreapi', 'cacheapi:clearallcaches -hard true', $options);
+		if (count($commands) > 0) {
+			$this->shell->executeOrSimulate($commands, $node, $deployment);
 		}
-		$commands[] = 'if [ -d "typo3conf/ext/coreapi" ]; then ' .
-			'typo3/cli_dispatch.phpsh extbase cacheapi:clearallcaches -hard true; ' .
-		'fi';
-
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
 
 	/**

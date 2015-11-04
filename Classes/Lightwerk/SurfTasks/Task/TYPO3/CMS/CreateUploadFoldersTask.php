@@ -10,7 +10,6 @@ use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
-use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
@@ -18,7 +17,7 @@ use TYPO3\Surf\Exception\TaskExecutionException;
  *
  * @package Lightwerk\SurfTasks
  */
-class CreateUploadFoldersTask extends Task {
+class CreateUploadFoldersTask extends ExtbaseCommandTask {
 
 	/**
 	 * @Flow\Inject
@@ -50,14 +49,9 @@ class CreateUploadFoldersTask extends Task {
 	 * @throws TaskExecutionException
 	 */
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-		if (!empty($options['context'])) {
-			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
+		$commands = $this->buildCommands($deployment, $application, 'coreapi', 'extensionapi:createuploadfolders', $options);
+		if (count($commands) > 0) {
+			$this->shell->executeOrSimulate($commands, $node, $deployment);
 		}
-		$commands[] = 'if [ -d "typo3conf/ext/coreapi" ]; then ' .
-			'typo3/cli_dispatch.phpsh extbase extensionapi:createuploadfolders; ' .
-			'fi';
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
 	}
 }
