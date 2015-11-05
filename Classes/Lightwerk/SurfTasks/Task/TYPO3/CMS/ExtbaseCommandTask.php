@@ -2,7 +2,7 @@
 namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
 
 /*                                                                        *
- * This script belongs to the TYPO3 Flow package "TYPO3.Surf".            *
+ * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTasks".   *
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow;
@@ -11,7 +11,7 @@ use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Application;
 
 /**
- * Creates the command for an extbase commando
+ * Creates the command for an extbase command
  *
  * @package Lightwerk\SurfTasks
  */
@@ -20,10 +20,10 @@ abstract class ExtbaseCommandTask extends Task {
 	/**
 	 * @param Deployment $deployment
 	 * @param Application $application
-	 * @param $extensionName
-	 * @param $arguments
+	 * @param string $extensionName
+	 * @param string $arguments
 	 * @param array $options
-	 * @return void
+	 * @return array
 	 */
 	protected function buildCommands(Deployment $deployment, Application $application, $extensionName, $arguments, $options = array()) {
 		$commands = array();
@@ -41,8 +41,8 @@ abstract class ExtbaseCommandTask extends Task {
 	/**
 	 * @param Deployment $deployment
 	 * @param Application $application
-	 * @param $extensionName
-	 * @param $arguments
+	 * @param string $extensionName
+	 * @param string $arguments
 	 * @return string
 	 */
 	protected function buildCommand(Deployment $deployment, Application $application, $extensionName, $arguments) {
