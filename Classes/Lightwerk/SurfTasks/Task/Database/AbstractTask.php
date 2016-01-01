@@ -88,7 +88,8 @@ abstract class AbstractTask extends ExtbaseCommandTask {
 	/**
 	 * Returns MySQL Arguments
 	 *
-	 * @param array $options
+	 * @param array $credentials
+	 * @param bool $appendDatabase
 	 * @return string
 	 */
 	protected function getMysqlArguments($credentials, $appendDatabase = TRUE) {
