@@ -60,9 +60,9 @@ class DumpTask extends AbstractTask {
 		if (empty($options['sourceNode']) === FALSE) {
 			$node = $this->nodeFactory->getNodeByArray($options['sourceNode']);
 			$options = array_replace_recursive($options, $options['sourceNodeOptions']);
-		} 
+		}
 
-		$credentials = $this->getCredentials($node, $deployment, $options);
+		$credentials = $this->getCredentials($node, $deployment, $options, $application);
 		$mysqlArguments = $this->getMysqlArguments($credentials);
 		$tableLikes = $this->getTableLikes($options, $credentials);
 		$dumpFile = $this->getDumpFile($options, $credentials);

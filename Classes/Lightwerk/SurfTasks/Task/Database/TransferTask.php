@@ -34,11 +34,11 @@ class TransferTask extends AbstractTask {
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
-		$credentials = $this->getCredentials($sourceNode, $deployment, $options['sourceNodeOptions']);
+		$credentials = $this->getCredentials($sourceNode, $deployment, $options['sourceNodeOptions'], $application);
 		$dumpFile = $this->getDumpFile($options['sourceNodeOptions'], $credentials);
 		$source = $this->getArgument($sourceNode, $dumpFile);
 
-		$credentials = $this->getCredentials($node, $deployment, $options);
+		$credentials = $this->getCredentials($node, $deployment, $options, $application);
 		$dumpFile = $this->getDumpFile($options, $credentials);
 		$target = $this->getArgument($node, $dumpFile);
 
