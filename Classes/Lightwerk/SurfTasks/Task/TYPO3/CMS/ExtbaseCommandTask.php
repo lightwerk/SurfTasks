@@ -67,7 +67,7 @@ abstract class ExtbaseCommandTask extends Task {
 		if (file_exists($composerFile) === TRUE) {
 			$json = json_decode(file_get_contents($composerFile), TRUE);
 			if ($json !== NULL && empty($json['extra']['typo3/cms']['web-dir']) === FALSE) {
-				return  $json['extra']['typo3/cms']['web-dir'] . '/';
+				return rtrim($json['extra']['typo3/cms']['web-dir'], '/') . '/';
 			}
 		}
 		return $webDir;

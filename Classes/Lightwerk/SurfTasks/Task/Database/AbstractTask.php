@@ -7,6 +7,7 @@ namespace Lightwerk\SurfTasks\Task\Database;
  *                                                                        */
 
 use Lightwerk\SurfTasks\Factory\NodeFactory;
+use Lightwerk\SurfTasks\Task\TYPO3\CMS\ExtbaseCommandTask;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
@@ -20,7 +21,7 @@ use TYPO3\Surf\Exception\TaskExecutionException;
  *
  * @package Lightwerk\SurfTasks
  */
-abstract class AbstractTask extends Task {
+abstract class AbstractTask extends ExtbaseCommandTask {
 
 	/**
 	 * @Flow\Inject
@@ -48,18 +49,19 @@ abstract class AbstractTask extends Task {
 	 * @param Node $node
 	 * @param Deployment $deployment
 	 * @param array $options
+	 * @param Application $application
 	 * @return array|mixed
 	 * @throws TaskExecutionException
 	 * @throws InvalidConfigurationException
 	 */
-	protected function getCredentials(Node $node, Deployment $deployment, array $options) {
+	protected function getCredentials(Node $node, Deployment $deployment, array $options, Application $application) {
 		if (empty($options['db']) === TRUE) {
 			throw new InvalidConfigurationException('db is not configured', 1429628542);
 		}
 		if (empty($options['db']['credentialsSource']) === FALSE) {
 			switch ($options['db']['credentialsSource']) {
 				case 'TYPO3\\CMS':
-					$credentials = $this->getCredentialsFromTypo3Cms($node, $deployment, $options);
+					$credentials = $this->getCredentialsFromTypo3Cms($node, $deployment, $options, $application);
 					break;
 				default:
 					throw new InvalidConfigurationException('unknown credentialsSource', 1429628543);
@@ -86,7 +88,8 @@ abstract class AbstractTask extends Task {
 	/**
 	 * Returns MySQL Arguments
 	 *
-	 * @param array $options
+	 * @param array $credentials
+	 * @param bool $appendDatabase
 	 * @return string
 	 */
 	protected function getMysqlArguments($credentials, $appendDatabase = TRUE) {
@@ -114,16 +117,18 @@ abstract class AbstractTask extends Task {
 	 * @param Node $node
 	 * @param Deployment $deployment
 	 * @param array $options
+	 * @param Application $application
 	 * @return array
 	 * @throws TaskExecutionException
 	 */
-	protected function getCredentialsFromTypo3Cms(Node $node, Deployment $deployment, array $options = array()) {
-		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($options['deploymentPath']);
-		if (!empty($options['context'])) {
-			$commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
+	protected function getCredentialsFromTypo3Cms(Node $node, Deployment $deployment, array $options = array(), Application $application) {
+		$commands = $this->buildCommands($deployment, $application, 'coreapi', 'configurationapi:show DB', $options);
+		if (empty($commands) === FALSE) {
+			// Overwrite first command
+			$commands[0] = 'cd ' . escapeshellarg($options['deploymentPath']);
+		} else {
+			throw new TaskExecutionException('Could not receive database credentials', 1409252547);
 		}
-		$commands[] = 'typo3/cli_dispatch.phpsh extbase configurationapi:show DB';
 
 		$returnedOutput = $this->shell->execute($commands, $node, $deployment, FALSE, FALSE);
 		$returnedOutput = json_decode($returnedOutput, TRUE);

@@ -41,7 +41,7 @@ class ImportTask extends AbstractTask {
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 		$options = array_replace_recursive($this->options, $options);
 
-		$credentials = $this->getCredentials($node, $deployment, $options);
+		$credentials = $this->getCredentials($node, $deployment, $options, $application);
 		$dumpFile = $this->getDumpFile($options, $credentials);
 		$mysqlArguments = $this->getMysqlArguments($credentials);
 		$mysqlAuthArguments = $this->getMysqlArguments($credentials, FALSE);

@@ -35,11 +35,11 @@ class CleanupTask extends AbstractTask {
 	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
 
 		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
-		$credentials = $this->getCredentials($sourceNode, $deployment, $options['sourceNodeOptions']);
+		$credentials = $this->getCredentials($sourceNode, $deployment, $options['sourceNodeOptions'], $application);
 		$dumpFile = $this->getDumpFile($options['sourceNodeOptions'], $credentials);
 		$this->shell->executeOrSimulate('rm ' . $dumpFile, $sourceNode, $deployment);
 
-		$credentials = $this->getCredentials($node, $deployment, $options);
+		$credentials = $this->getCredentials($node, $deployment, $options, $application);
 		$dumpFile = $this->getDumpFile($options, $credentials);
 		$this->shell->executeOrSimulate('rm ' . $dumpFile, $node, $deployment);
 	}

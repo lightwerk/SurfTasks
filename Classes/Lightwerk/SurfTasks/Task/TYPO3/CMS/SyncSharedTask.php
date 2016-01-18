@@ -21,7 +21,7 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
  *
  * @package Lightwerk\SurfTasks
  */
-class SyncSharedTask extends Task {
+class SyncSharedTask extends ExtbaseCommandTask {
 
 	/**
 	 * @Flow\Inject
@@ -60,9 +60,9 @@ class SyncSharedTask extends Task {
 		$targetNode = $node;
 
 		// Get shared paths
-		$sourceSharedPath = $this->getSharedPathFromNode($sourceNode, $deployment, $options['sourceNodeOptions']);
+		$sourceSharedPath = $this->getSharedPathFromNode($sourceNode, $deployment, $options['sourceNodeOptions'], $application);
 		$localSharedPath = $deployment->getWorkspacePath($application) . '_shared/';
-		$targetSharedPath = $this->getSharedPathFromNode($node, $deployment, $options);
+		$targetSharedPath = $this->getSharedPathFromNode($node, $deployment, $options, $application);
 
 		// maybe we should change this behaviour ...
 		if ($targetNode->isLocalhost() === TRUE || $sourceNode->isLocalhost() === TRUE) {
@@ -99,11 +99,12 @@ class SyncSharedTask extends Task {
 	 * @param Node $node
 	 * @param Deployment $deployment
 	 * @param array $options
+	 * @param Application $application
 	 * @return string
 	 * @throws InvalidConfigurationException
 	 * @throws TaskExecutionException
 	 */
-	protected function getSharedPathFromNode(Node $node, Deployment $deployment, $options) {
+	protected function getSharedPathFromNode(Node $node, Deployment $deployment, $options, Application $application) {
 		if ($node->hasOption('sharedPath')) {
 			$sharedPath = $node->getOption('sharedPath');
 		} else {
@@ -113,6 +114,10 @@ class SyncSharedTask extends Task {
 				$deploymentPath = $options['deploymentPath'];
 			} else {
 				throw new InvalidConfigurationException('No deploymentPath defined!', 1414849872);
+			}
+			$webDir = $this->getWebDir($deployment, $application);
+			if ($webDir !== '') {
+				$deploymentPath = rtrim($deploymentPath, '/') . '/' . $webDir;
 			}
 
 			$commands = array();
