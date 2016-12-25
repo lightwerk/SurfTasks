@@ -20,57 +20,59 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
  *
  * @package Lightwerk\SurfTasks
  */
-class RsyncTask extends Task {
+class RsyncTask extends Task
+{
+    /**
+     * @Flow\Inject
+     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     */
+    protected $shell;
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-	 */
-	protected $shell;
+    /**
+     * @Flow\Inject
+     * @var RsyncService
+     */
+    protected $rsyncService;
 
-	/**
-	 * @Flow\Inject
-	 * @var RsyncService
-	 */
-	protected $rsyncService;
+    /**
+     * Simulate this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->execute($node, $application, $deployment, $options);
+    }
 
-	/**
-	 * Executes this task
-	 *
-	 * @param \TYPO3\Surf\Domain\Model\Node $node
-	 * @param \TYPO3\Surf\Domain\Model\Application $application
-	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 * @throws InvalidConfigurationException
-	 * @throws TaskExecutionException
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		// Sync files
-		$this->rsyncService->sync(
-			// $sourceNode
-			$deployment->getNode('localhost'),
-			// $sourcePath
-			$deployment->getWorkspacePath($application),
-			// $destinationNode
-			$node,
-			// $destinationPath
-			$deployment->getApplicationReleasePath($application),
-			$deployment,
-			$options
-		);
-	}
-
-	/**
-	 * Simulate this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->execute($node, $application, $deployment, $options);
-	}
+    /**
+     * Executes this task
+     *
+     * @param \TYPO3\Surf\Domain\Model\Node $node
+     * @param \TYPO3\Surf\Domain\Model\Application $application
+     * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
+     * @param array $options
+     * @return void
+     * @throws InvalidConfigurationException
+     * @throws TaskExecutionException
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        // Sync files
+        $this->rsyncService->sync(
+            // $sourceNode
+            $deployment->getNode('localhost'),
+            // $sourcePath
+            $deployment->getWorkspacePath($application),
+            // $destinationNode
+            $node,
+            // $destinationPath
+            $deployment->getApplicationReleasePath($application),
+            $deployment,
+            $options
+        );
+    }
 }

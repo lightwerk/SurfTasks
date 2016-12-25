@@ -16,32 +16,33 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
  * @Flow\Scope("singleton")
  * @package Lightwerk\SurfTasks
  */
-class NodeFactory {
-
-	/**
-	 * @param array $configuration
-	 * @return Node
-	 * @throws InvalidConfigurationException
-	 */
-	public function getNodeByArray(array $configuration) {
-		if (empty($configuration['name'])) {
-			throw new InvalidConfigurationException('Name is not given for node', 1437472548);
-		}
-		if (empty($configuration['hostname'])) {
-			throw new InvalidConfigurationException('Hostname is not given for node', 1437472549);
-		}
-		$node = new Node($configuration['name']);
-		foreach ($configuration as $key => $value) {
-			if ($key === 'name') {
-				continue;
-			}
-			$method = 'set' . ucfirst($key);
-			if (method_exists($node, $method)) {
-				$node->$method($value);
-			} else {
-				$node->setOption($key, $value);
-			}
-		}
-		return $node;
-	}
+class NodeFactory
+{
+    /**
+     * @param array $configuration
+     * @return Node
+     * @throws InvalidConfigurationException
+     */
+    public function getNodeByArray(array $configuration)
+    {
+        if (empty($configuration['name'])) {
+            throw new InvalidConfigurationException('Name is not given for node', 1437472548);
+        }
+        if (empty($configuration['hostname'])) {
+            throw new InvalidConfigurationException('Hostname is not given for node', 1437472549);
+        }
+        $node = new Node($configuration['name']);
+        foreach ($configuration as $key => $value) {
+            if ($key === 'name') {
+                continue;
+            }
+            $method = 'set' . ucfirst($key);
+            if (method_exists($node, $method)) {
+                $node->$method($value);
+            } else {
+                $node->setOption($key, $value);
+            }
+        }
+        return $node;
+    }
 }

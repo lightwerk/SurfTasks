@@ -18,27 +18,27 @@ use TYPO3\Surf\Exception\TaskExecutionException;
  *
  * @package Lightwerk\SurfTasks
  */
-class RemoveTask extends AbstractTask {
+class RemoveTask extends AbstractTask
+{
+    /**
+     * Executes this task
+     *
+     * @param \TYPO3\Surf\Domain\Model\Node $node
+     * @param \TYPO3\Surf\Domain\Model\Application $application
+     * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
+     * @param array $options
+     * @return void
+     * @throws TaskExecutionException
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $commands = [
+            'cd ' . escapeshellarg(rtrim($application->getReleasesPath(), '/') . '/' . $this->getTargetPath($options)),
+            'rm -f ' . escapeshellarg($this->getFileName($options))
+        ];
+        $this->shell->executeOrSimulate($commands, $node, $deployment);
 
-	/**
-	 * Executes this task
-	 *
-	 * @param \TYPO3\Surf\Domain\Model\Node $node
-	 * @param \TYPO3\Surf\Domain\Model\Application $application
-	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 * @throws TaskExecutionException
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$commands = array(
-			'cd ' . escapeshellarg(rtrim($application->getReleasesPath(), '/') . '/' . $this->getTargetPath($options)),
-			'rm -f ' . escapeshellarg($this->getFileName($options))
-		);
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
-
-		$commands[0] = 'cd ' . escapeshellarg(rtrim($deployment->getWorkspacePath($application), '/') . '/' . $this->getTargetPath($options));
-		$this->shell->executeOrSimulate($commands, $deployment->getNode('localhost'), $deployment);
-	}
-
+        $commands[0] = 'cd ' . escapeshellarg(rtrim($deployment->getWorkspacePath($application), '/') . '/' . $this->getTargetPath($options));
+        $this->shell->executeOrSimulate($commands, $deployment->getNode('localhost'), $deployment);
+    }
 }

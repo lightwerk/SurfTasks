@@ -16,51 +16,60 @@ use TYPO3\Surf\Exception\TaskExecutionException;
  *
  * @package Lightwerk\SurfTasks
  */
-class UpdateDatabaseTask extends ExtbaseCommandTask {
+class UpdateDatabaseTask extends ExtbaseCommandTask
+{
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-	 */
-	protected $shell;
+    /**
+     * @Flow\Inject
+     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     */
+    protected $shell;
 
-	/**
-	 * Executes this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 * @throws TaskExecutionException
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		// Actions:
-		// * 1 = ACTION_UPDATE_CLEAR_TABLE
-		// * 2 = ACTION_UPDATE_ADD
-		// * 3 = ACTION_UPDATE_CHANGE
-		// * 4 = ACTION_UPDATE_CREATE_TABLE
-		//   5 = ACTION_REMOVE_CHANGE
-		//   6 = ACTION_REMOVE_DROP
-		//   7 = ACTION_REMOVE_CHANGE_TABLE
-		//   8 = ACTION_REMOVE_DROP_TABLE
-		$actions = !empty($options['updateDatabaseActions']) ? $options['updateDatabaseActions'] : '1,2,3,4';
-		$commands = $this->buildCommands($deployment, $application, 'coreapi', 'databaseapi:databasecompare ' . escapeshellarg($actions), $options);
-		if (count($commands) > 0) {
-			$this->shell->executeOrSimulate($commands, $node, $deployment);
-		}
-	}
+    /**
+     * Simulate this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->execute($node, $application, $deployment, $options);
+    }
 
-	/**
-	 * Simulate this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->execute($node, $application, $deployment, $options);
-	}
+    /**
+     * Executes this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     * @throws TaskExecutionException
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        // Actions:
+        // * 1 = ACTION_UPDATE_CLEAR_TABLE
+        // * 2 = ACTION_UPDATE_ADD
+        // * 3 = ACTION_UPDATE_CHANGE
+        // * 4 = ACTION_UPDATE_CREATE_TABLE
+        //   5 = ACTION_REMOVE_CHANGE
+        //   6 = ACTION_REMOVE_DROP
+        //   7 = ACTION_REMOVE_CHANGE_TABLE
+        //   8 = ACTION_REMOVE_DROP_TABLE
+        $actions = !empty($options['updateDatabaseActions']) ? $options['updateDatabaseActions'] : '1,2,3,4';
+        $commands = $this->buildCommands(
+            $deployment,
+            $application,
+            'coreapi',
+            'databaseapi:databasecompare ' . escapeshellarg($actions),
+            $options
+        );
+        if (count($commands) > 0) {
+            $this->shell->executeOrSimulate($commands, $node, $deployment);
+        }
+    }
 }

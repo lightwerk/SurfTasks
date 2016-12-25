@@ -20,92 +20,96 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
  *
  * @package Lightwerk\SurfTasks
  */
-class CopyMysqlDumpTask extends Task {
+class CopyMysqlDumpTask extends Task
+{
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-	 */
-	protected $shell;
+    /**
+     * @Flow\Inject
+     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     */
+    protected $shell;
 
-	/**
-	 * @Flow\Inject
-	 * @var NodeFactory
-	 */
-	protected $nodeFactory;
+    /**
+     * @Flow\Inject
+     * @var NodeFactory
+     */
+    protected $nodeFactory;
 
-	/**
-	 * @var array
-	 */
-	protected $options = array(
-		'sourcePath' => '.',
-		'sourceFile' => 'mysqldump.sql.gz',
-		'targetPath' => '.',
-		'targetFile' => 'mysqldump.sql.gz',
-	);
+    /**
+     * @var array
+     */
+    protected $options = [
+        'sourcePath' => '.',
+        'sourceFile' => 'mysqldump.sql.gz',
+        'targetPath' => '.',
+        'targetFile' => 'mysqldump.sql.gz',
+    ];
 
-	/**
-	 * Executes the task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @throws InvalidConfigurationException
-	 * @throws TaskExecutionException
-	 * @return void
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		if (empty($options['sourceNode']) || !is_array($options['sourceNode'])) {
-			throw new InvalidConfigurationException('SourceNode is missing', 1409263510);
-		}
-		$sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
+    /**
+     * Simulate this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->execute($node, $application, $deployment, $options);
+    }
 
-		$options = array_replace_recursive($this->options, $options);
+    /**
+     * Executes the task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @throws InvalidConfigurationException
+     * @throws TaskExecutionException
+     * @return void
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        if (empty($options['sourceNode']) || !is_array($options['sourceNode'])) {
+            throw new InvalidConfigurationException('SourceNode is missing', 1409263510);
+        }
+        $sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
 
-		$source = $this->getArgument($sourceNode, $application, $options['sourcePath'], $options['sourceFile']);
-		$target = $this->getArgument($node, $application, $options['targetPath'], $options['targetFile']);
-		$command = 'scp -o BatchMode=\'yes\' ' . $source . ' ' . $target;
+        $options = array_replace_recursive($this->options, $options);
 
-		$this->shell->executeOrSimulate($command, $node, $deployment);
-	}
+        $source = $this->getArgument($sourceNode, $application, $options['sourcePath'], $options['sourceFile']);
+        $target = $this->getArgument($node, $application, $options['targetPath'], $options['targetFile']);
+        $command = 'scp -o BatchMode=\'yes\' ' . $source . ' ' . $target;
 
-	/**
-	 * Simulate this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->execute($node, $application, $deployment, $options);
-	}
+        $this->shell->executeOrSimulate($command, $node, $deployment);
+    }
 
-	/**
-	 * @param Node $node
-	 * @param Application $application
-	 * @param string $path
-	 * @param string $file
-	 * @return string
-	 */
-	protected function getArgument(Node $node, Application $application, $path, $file) {
-		$argument = '';
+    /**
+     * @param Node $node
+     * @param Application $application
+     * @param string $path
+     * @param string $file
+     * @return string
+     */
+    protected function getArgument(Node $node, Application $application, $path, $file)
+    {
+        $argument = '';
 
-		if ($node->hasOption('username')) {
-			$username = $node->getOption('username');
-			if (!empty($username)) {
-				$argument .= $username . '@';
-			}
-		}
+        if ($node->hasOption('username')) {
+            $username = $node->getOption('username');
+            if (!empty($username)) {
+                $argument .= $username . '@';
+            }
+        }
 
-		$argument .= $node->getHostname() . ':';
+        $argument .= $node->getHostname() . ':';
 
-		$argument .= rtrim($application->getReleasesPath(), '/') . '/';
-		$argument = rtrim($argument . $path, '/') . '/';
-		$argument .= $file;
+        $argument .= rtrim($application->getReleasesPath(), '/') . '/';
+        $argument = rtrim($argument . $path, '/') . '/';
+        $argument .= $file;
 
-		return $argument;
-	}
+        return $argument;
+    }
 }

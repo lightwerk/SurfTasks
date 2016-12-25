@@ -18,53 +18,55 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
  *
  * @package Lightwerk\SurfTasks
  */
-class RemoveDeployBranchTask extends Task {
+class RemoveDeployBranchTask extends Task
+{
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-	 */
-	protected $shell;
+    /**
+     * @Flow\Inject
+     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     */
+    protected $shell;
 
-	/**
-	 * Executes this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 * @throws InvalidConfigurationException
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		if (empty($options['branch']) || !empty($options['tag'])) {
-			return;
-		}
+    /**
+     * Simulate this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->execute($node, $application, $deployment, $options);
+    }
 
-		$quietFlag = (isset($options['verbose']) && $options['verbose']) ? '' : '-q';
+    /**
+     * Executes this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     * @throws InvalidConfigurationException
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        if (empty($options['branch']) || !empty($options['tag'])) {
+            return;
+        }
 
-		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-		$commands[] = 'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
-			'git branch -f ' . escapeshellarg($options['branch']) . ' deploy && ' .
-			'git checkout ' . $quietFlag . ' ' . escapeshellarg($options['branch']) . ' && ' .
-			'git branch -D deploy; ' .
-		'fi;';
+        $quietFlag = (isset($options['verbose']) && $options['verbose']) ? '' : '-q';
 
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
-	}
+        $commands = [];
+        $commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
+        $commands[] = 'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
+            'git branch -f ' . escapeshellarg($options['branch']) . ' deploy && ' .
+            'git checkout ' . $quietFlag . ' ' . escapeshellarg($options['branch']) . ' && ' .
+            'git branch -D deploy; ' .
+            'fi;';
 
-	/**
-	 * Simulate this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->execute($node, $application, $deployment, $options);
-	}
-
+        $this->shell->executeOrSimulate($commands, $node, $deployment);
+    }
 }
