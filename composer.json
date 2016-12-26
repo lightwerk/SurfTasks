@@ -9,9 +9,6 @@
         "Deployment",
         "Tasks"
     ],
-    "require": {
-      "typo3/surf": "*"
-    },
     "authors": [
         {
             "name": "Daniel Goerz",
@@ -34,8 +31,8 @@
         "typo3/surf": "*"
     },
     "autoload": {
-        "psr-0": {
-            "Lightwerk\\SurfTasks": "Classes"
+        "psr-4": {
+            "Lightwerk\\SurfTasks\\": "Classes/Lightwerk/SurfTasks"
         }
     }
 }
