@@ -27,9 +27,6 @@
         "issues": "https://github.com/lightwerk/SurfTasks/issues",
         "source": "https://github.com/lightwerk/SurfTasks"
     },
-    "require": {
-        "typo3/surf": "*"
-    },
     "autoload": {
         "psr-4": {
             "Lightwerk\\SurfTasks\\": "Classes/Lightwerk/SurfTasks"
