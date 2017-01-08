@@ -2,7 +2,9 @@
     "name": "lightwerk/surftasks",
     "type": "typo3-flow-package",
     "description": "Additional tasks for TYPO3.Surf.",
-    "license": ["GPL-3.0+"],
+    "license": [
+        "GPL-3.0+"
+    ],
     "homepage": "https://github.com/lightwerk/SurfTasks",
     "keywords": [
         "TYPO3 Surf",
@@ -31,5 +33,10 @@
         "psr-4": {
             "Lightwerk\\SurfTasks\\": "Classes/Lightwerk/SurfTasks"
         }
+    },
+    "extra": {
+        "applied-flow-migrations": [
+            "TYPO3.FLOW3-201201261636"
+        ]
     }
 }
