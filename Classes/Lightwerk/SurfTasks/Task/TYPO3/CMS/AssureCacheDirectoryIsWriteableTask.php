@@ -15,41 +15,49 @@ use TYPO3\Surf\Exception\TaskExecutionException;
 /**
  * @package Lightwerk\SurfTasks
  */
-class AssureCacheDirectoryIsWriteableTask extends ExtbaseCommandTask {
+class AssureCacheDirectoryIsWriteableTask extends ExtbaseCommandTask
+{
+    /**
+     * @Flow\Inject
+     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     */
+    protected $shell;
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-	 */
-	protected $shell;
+    /**
+     * Simulate this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->execute($node, $application, $deployment, $options);
+    }
 
-	/**
-	 * Executes this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @throws TaskExecutionException
-	 * @return void
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$commands = $this->buildCommands($deployment, $application, 'coreapi', 'cacheapi:assurecachedirectoryiswriteable', $options);
-		if (count($commands) > 0) {
-			$this->shell->executeOrSimulate($commands, $node, $deployment);
-		}
-	}
-
-	/**
-	 * Simulate this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->execute($node, $application, $deployment, $options);
-	}
+    /**
+     * Executes this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @throws TaskExecutionException
+     * @return void
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $commands = $this->buildCommands(
+            $deployment,
+            $application,
+            'coreapi',
+            'cacheapi:assurecachedirectoryiswriteable',
+            $options
+        );
+        if (count($commands) > 0) {
+            $this->shell->executeOrSimulate($commands, $node, $deployment);
+        }
+    }
 }

@@ -17,74 +17,80 @@ use TYPO3\Surf\Domain\Model\Task;
  *
  * @package Lightwerk\SurfTasks
  */
-class ClearPhpCacheTask extends Task {
+class ClearPhpCacheTask extends Task
+{
+    /**
+     * @Flow\Inject
+     * @var \TYPO3\Flow\Http\Client\Browser
+     */
+    protected $browser;
 
+    /**
+     * @Flow\Inject
+     * @var \TYPO3\Flow\Http\Client\CurlEngine
+     */
+    protected $browserRequestEngine;
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Flow\Http\Client\Browser
-	 */
-	protected $browser;
+    /**
+     * @return void
+     */
+    public function initializeObject()
+    {
+        $this->browserRequestEngine->setOption(CURLOPT_SSL_VERIFYPEER, false);
+        $this->browserRequestEngine->setOption(CURLOPT_SSL_VERIFYHOST, false);
+        $this->browser->setRequestEngine($this->browserRequestEngine);
+    }
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Flow\Http\Client\CurlEngine
-	 */
-	protected $browserRequestEngine;
+    /**
+     * Executes this task
+     *
+     * @param \TYPO3\Surf\Domain\Model\Node $node
+     * @param \TYPO3\Surf\Domain\Model\Application $application
+     * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->executeOrSimulate($node, $application, $deployment, $options);
+    }
 
-	/**
-	 * @return void
-	 */
-	public function initializeObject() {
-		$this->browserRequestEngine->setOption(CURLOPT_SSL_VERIFYPEER, FALSE);
-		$this->browserRequestEngine->setOption(CURLOPT_SSL_VERIFYHOST, FALSE);
-		$this->browser->setRequestEngine($this->browserRequestEngine);
-	}
+    /**
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @throws \TYPO3\Flow\Http\Client\InfiniteRedirectionException
+     */
+    protected function executeOrSimulate(
+        Node $node,
+        Application $application,
+        Deployment $deployment,
+        array $options = []
+    ) {
+        if (empty($options['clearPhpCacheUris'])) {
+            return;
+        }
+        $uris = is_array($options['clearPhpCacheUris']) ? $options['clearPhpCacheUris'] : [$options['clearPhpCacheUris']];
+        foreach ($uris as $uri) {
+            $deployment->getLogger()->log('... (localhost): curl "' . $uri . '"', LOG_DEBUG);
+            if ($deployment->isDryRun() === false) {
+                $this->browser->request($uri);
+            }
+        }
+    }
 
-	/**
-	 * Executes this task
-	 *
-	 * @param \TYPO3\Surf\Domain\Model\Node $node
-	 * @param \TYPO3\Surf\Domain\Model\Application $application
-	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->executeOrSimulate($node, $application, $deployment, $options);
-	}
-
-	/**
-	 * Simulate this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->executeOrSimulate($node, $application, $deployment, $options);
-	}
-
-	/**
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @throws \TYPO3\Flow\Http\Client\InfiniteRedirectionException
-	 */
-	protected function executeOrSimulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		if (empty($options['clearPhpCacheUris'])) {
-			return;
-		}
-		$uris = is_array($options['clearPhpCacheUris']) ? $options['clearPhpCacheUris'] : array($options['clearPhpCacheUris']);
-		foreach ($uris as $uri) {
-			$deployment->getLogger()->log('... (localhost): curl "' . $uri . '"', LOG_DEBUG);
-			if ($deployment->isDryRun() === FALSE) {
-				$this->browser->request($uri);
-			}
-		}
-	}
-
+    /**
+     * Simulate this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->executeOrSimulate($node, $application, $deployment, $options);
+    }
 }

@@ -14,31 +14,32 @@ use TYPO3\Flow\Annotations as Flow;
  * @Flow\Scope("singleton")
  * @package Lightwerk\SurfTasks
  */
-class MysqlService {
+class MysqlService
+{
+    /**
+     * @param array $options
+     * @return string
+     */
+    public function getMysqlArguments($options)
+    {
+        $arguments = [];
+        $argumentKeys = ['username', 'password', 'host', 'socket', 'port'];
 
-	/**
-	 * @param array $options
-	 * @return string
-	 */
-	public function getMysqlArguments($options) {
-		$arguments = array();
-		$argumentKeys = array('username', 'password', 'host', 'socket', 'port');
+        foreach ($argumentKeys as $key) {
+            if (empty($options[$key])) {
+                continue;
+            }
+            $value = escapeshellarg($options[$key]);
+            if (strlen($key) === 1) {
+                $arguments[$key] = '-' . $key . ' ' . $value;
+            } else {
+                $arguments[$key] = '--' . $key . '=' . $value;
+            }
+        }
 
-		foreach ($argumentKeys as $key) {
-			if (empty($options[$key])) {
-				continue;
-			}
-			$value = escapeshellarg($options[$key]);
-			if (strlen($key) === 1) {
-				$arguments[$key] = '-' . $key . ' ' . $value;
-			} else {
-				$arguments[$key] = '--' . $key . '=' . $value;
-			}
-		}
-
-		if (!empty($options['database'])) {
-			$arguments[] = $options['database'];
-		}
-		return implode(' ', $arguments);
-	}
+        if (!empty($options['database'])) {
+            $arguments[] = $options['database'];
+        }
+        return implode(' ', $arguments);
+    }
 }

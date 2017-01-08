@@ -19,65 +19,67 @@ use TYPO3\Surf\Exception\TaskExecutionException;
  *
  * @package Lightwerk\SurfTasks
  */
-class GulpTask extends Task {
+class GulpTask extends Task
+{
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-	 */
-	protected $shell;
+    /**
+     * @Flow\Inject
+     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     */
+    protected $shell;
 
-	/**
-	 * Executes this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 * @throws InvalidConfigurationException
-	 * @throws TaskExecutionException
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		if (isset($options['useApplicationWorkspace']) && $options['useApplicationWorkspace'] === TRUE) {
-			$rootPath = $deployment->getWorkspacePath($application);
-		} else {
-			$rootPath = $deployment->getApplicationReleasePath($application);
-		}
-		if (isset($options['relativeRootPath'])) {
-			$rootPath .= $options['relativeRootPath'];
-		}
+    /**
+     * Simulate this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->execute($node, $application, $deployment, $options);
+    }
 
-		if (!empty($options['nodeName'])) {
-			$node = $deployment->getNode($options['nodeName']);
-			if ($node === NULL) {
-				throw new InvalidConfigurationException(
-					sprintf('Node "%s" not found', $options['nodeName']),
-					1414781227
-				);
-			}
-		}
+    /**
+     * Executes this task
+     *
+     * @param Node $node
+     * @param Application $application
+     * @param Deployment $deployment
+     * @param array $options
+     * @return void
+     * @throws InvalidConfigurationException
+     * @throws TaskExecutionException
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        if (isset($options['useApplicationWorkspace']) && $options['useApplicationWorkspace'] === true) {
+            $rootPath = $deployment->getWorkspacePath($application);
+        } else {
+            $rootPath = $deployment->getApplicationReleasePath($application);
+        }
+        if (isset($options['relativeRootPath'])) {
+            $rootPath .= $options['relativeRootPath'];
+        }
 
-		$commands = array();
-		$commands[] = 'cd ' . escapeshellarg($rootPath);
-		$commands[] = 'if hash gulp 2>/dev/null && [ -f gulpfile.js ]; then ' .
-			'gulp build; ' .
-		'fi;';
+        if (!empty($options['nodeName'])) {
+            $node = $deployment->getNode($options['nodeName']);
+            if ($node === null) {
+                throw new InvalidConfigurationException(
+                    sprintf('Node "%s" not found', $options['nodeName']),
+                    1414781227
+                );
+            }
+        }
 
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
-	}
+        $commands = [];
+        $commands[] = 'cd ' . escapeshellarg($rootPath);
+        $commands[] = 'if hash gulp 2>/dev/null && [ -f gulpfile.js ]; then ' .
+            'gulp build; ' .
+            'fi;';
 
-	/**
-	 * Simulate this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->execute($node, $application, $deployment, $options);
-	}
-
+        $this->shell->executeOrSimulate($commands, $node, $deployment);
+    }
 }

@@ -18,96 +18,100 @@ use TYPO3\Surf\Exception\TaskExecutionException;
  *
  * @package Lightwerk\SurfTasks
  */
-class CreateTask extends AbstractTask {
+class CreateTask extends AbstractTask
+{
+    /**
+     * Executes this task
+     *
+     * @param \TYPO3\Surf\Domain\Model\Node $node
+     * @param \TYPO3\Surf\Domain\Model\Application $application
+     * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
+     * @param array $options
+     * @return void
+     * @throws TaskExecutionException
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $content = [
+            date('Y-m-d H:i:s (D)'),
+            'Application: ' . $application->getName(),
+            'Deployment: ' . $deployment->getName(),
+        ];
 
-	/**
-	 * Executes this task
-	 *
-	 * @param \TYPO3\Surf\Domain\Model\Node $node
-	 * @param \TYPO3\Surf\Domain\Model\Application $application
-	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 * @throws TaskExecutionException
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$content = array(
-			date('Y-m-d H:i:s (D)'),
-			'Application: ' . $application->getName(),
-			'Deployment: ' . $deployment->getName(),
-		);
+        $this->createFile(
+            rtrim($application->getReleasesPath(), '/') . '/' . $this->getTargetPath($options),
+            $content,
+            $node,
+            $deployment,
+            $options
+        );
 
-		$this->createFile(
-			rtrim($application->getReleasesPath(), '/') . '/' . $this->getTargetPath($options),
-			$content,
-			$node,
-			$deployment,
-			$options
-		);
+        $this->createFile(
+            rtrim($deployment->getWorkspacePath($application), '/') . '/' . $this->getTargetPath($options),
+            $content,
+            $deployment->getNode('localhost'),
+            $deployment,
+            $options
+        );
+    }
 
-		$this->createFile(
-			rtrim($deployment->getWorkspacePath($application), '/') . '/' . $this->getTargetPath($options),
-			$content,
-			$deployment->getNode('localhost'),
-			$deployment,
-			$options
-		);
-	}
+    /**
+     * @param $directoryPath
+     * @param $content
+     * @param Node $node
+     * @param Deployment $deployment
+     * @param array $options
+     * @throws TaskExecutionException
+     */
+    protected function createFile($directoryPath, $content, Node $node, Deployment $deployment, array $options)
+    {
+        $commands = [
+            'mkdir -p ' . escapeshellarg($directoryPath),
+            'cd ' . escapeshellarg($directoryPath),
+            'echo ' . escapeshellarg(implode(' | ', $content)) . ' > ' . escapeshellarg($this->getFileName($options))
+        ];
+        $this->shell->executeOrSimulate($commands, $node, $deployment);
+    }
 
-	/**
-	 * Rollback this task
-	 *
-	 * @param \TYPO3\Surf\Domain\Model\Node $node
-	 * @param \TYPO3\Surf\Domain\Model\Application $application
-	 * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function rollback(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->removeFile(
-			rtrim($application->getReleasesPath(), '/') . '/' . $this->getTargetPath($options),
-			$node,
-			$deployment,
-			$options
-		);
+    /**
+     * Rollback this task
+     *
+     * @param \TYPO3\Surf\Domain\Model\Node $node
+     * @param \TYPO3\Surf\Domain\Model\Application $application
+     * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
+     * @param array $options
+     * @return void
+     */
+    public function rollback(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->removeFile(
+            rtrim($application->getReleasesPath(), '/') . '/' . $this->getTargetPath($options),
+            $node,
+            $deployment,
+            $options
+        );
 
-		$this->removeFile(
-			rtrim($deployment->getWorkspacePath($application), '/') . '/' . $this->getTargetPath($options),
-			$deployment->getNode('localhost'),
-			$deployment,
-			$options
-		);
-	}
+        $this->removeFile(
+            rtrim($deployment->getWorkspacePath($application), '/') . '/' . $this->getTargetPath($options),
+            $deployment->getNode('localhost'),
+            $deployment,
+            $options
+        );
+    }
 
-	/**
-	 * @param $directoryPath
-	 * @param $content
-	 * @param Node $node
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @throws TaskExecutionException
-	 */
-	protected function createFile($directoryPath, $content, Node $node, Deployment $deployment, array $options) {
-		$commands = array(
-			'mkdir -p ' . escapeshellarg($directoryPath),
-			'cd ' . escapeshellarg($directoryPath),
-			'echo ' . escapeshellarg(implode(' | ', $content)) . ' > ' . escapeshellarg($this->getFileName($options))
-		);
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
-	}
-
-	/**
-	 * @param string $directoryPath
-	 * @param Node $node
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @throws TaskExecutionException
-	 */
-	protected function removeFile($directoryPath, Node $node, Deployment $deployment, array $options) {
-		$commands = array(
-			'cd ' . escapeshellarg($directoryPath),
-			'rm -f ' . escapeshellarg($this->getFileName($options))
-		);
-		$this->shell->executeOrSimulate($commands, $node, $deployment);
-	}
+    /**
+     * @param string $directoryPath
+     * @param Node $node
+     * @param Deployment $deployment
+     * @param array $options
+     * @throws TaskExecutionException
+     */
+    protected function removeFile($directoryPath, Node $node, Deployment $deployment, array $options)
+    {
+        $commands = [
+            'cd ' . escapeshellarg($directoryPath),
+            'rm -f ' . escapeshellarg($this->getFileName($options))
+        ];
+        $this->shell->executeOrSimulate($commands, $node, $deployment);
+    }
 }
