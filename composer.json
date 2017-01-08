@@ -34,6 +34,9 @@
             "Lightwerk\\SurfTasks\\": "Classes/Lightwerk/SurfTasks"
         }
     },
+    "require": {
+        "typo3/surf": "*"
+    },
     "extra": {
         "applied-flow-migrations": [
             "TYPO3.FLOW3-201201261636",
