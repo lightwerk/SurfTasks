@@ -2,16 +2,15 @@
     "name": "lightwerk/surftasks",
     "type": "typo3-flow-package",
     "description": "Additional tasks for TYPO3.Surf.",
-    "license": ["GPL-3.0+"],
+    "license": [
+        "GPL-3.0+"
+    ],
     "homepage": "https://github.com/lightwerk/SurfTasks",
     "keywords": [
         "TYPO3 Surf",
         "Deployment",
         "Tasks"
     ],
-    "require": {
-      "typo3/surf": "*"
-    },
     "authors": [
         {
             "name": "Daniel Goerz",
@@ -30,12 +29,13 @@
         "issues": "https://github.com/lightwerk/SurfTasks/issues",
         "source": "https://github.com/lightwerk/SurfTasks"
     },
-    "require": {
-        "typo3/surf": "*"
-    },
     "autoload": {
-        "psr-0": {
-            "Lightwerk\\SurfTasks": "Classes"
+        "psr-4": {
+            "Lightwerk\\SurfTasks\\": "Classes/Lightwerk/SurfTasks"
         }
+    },
+    "require": {
+        "typo3/flow": "^3.3",
+        "typo3/surf": "*"
     }
 }
