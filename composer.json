@@ -35,7 +35,7 @@
         }
     },
     "require": {
-        "typo3/flow": "^3.3",
-        "typo3/surf": "*"
+        "neos/flow": "^3.3",
+        "neos/surf": "^0.9"
     }
 }
