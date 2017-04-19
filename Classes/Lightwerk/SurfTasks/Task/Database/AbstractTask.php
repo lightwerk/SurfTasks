@@ -101,11 +101,19 @@ abstract class AbstractTask extends ExtbaseCommandTask
             throw new TaskExecutionException('Could not receive database credentials', 1409252546);
         }
 
+        // Compatibility with TYPO3 v8
+        if (!empty($returnedOutput['Connections'])) {
+            $returnedOutput = $returnedOutput['Connections']['Default'];
+        }
+
         $credentials = [];
         foreach ($returnedOutput as $key => $value) {
             switch ($key) {
                 case 'username':
                     $credentials['user'] = $value;
+                    break;
+                case 'dbname':
+                    $credentials['database'] = $value;
                     break;
                 default:
                     $credentials[$key] = $value;
