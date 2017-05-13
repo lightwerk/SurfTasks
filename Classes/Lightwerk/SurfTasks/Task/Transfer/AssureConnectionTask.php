@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Transfer;
 
 /*                                                                        *
@@ -14,26 +15,24 @@ use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * AssureConnectionTask Task
- *
- * @package Lightwerk\SurfTasks
+ * AssureConnectionTask Task.
  */
 class AssureConnectionTask extends Task
 {
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -41,14 +40,14 @@ class AssureConnectionTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws TaskExecutionException
-     * @return void
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -57,17 +56,17 @@ class AssureConnectionTask extends Task
         } else {
             $username = $node->hasOption('username') ? $node->getOption('username') : null;
             if (!empty($username)) {
-                $username = $username . '@';
+                $username = $username.'@';
             }
 
             $hostname = $node->getHostname();
 
             $sshOptions = ['-A', '-q', '-o BatchMode=yes'];
             if ($node->hasOption('port')) {
-                $sshOptions[] = '-p ' . escapeshellarg($node->getOption('port'));
+                $sshOptions[] = '-p '.escapeshellarg($node->getOption('port'));
             }
 
-            $command = 'ssh ' . implode(' ', $sshOptions) . ' ' . escapeshellarg($username . $hostname) . ' exit;';
+            $command = 'ssh '.implode(' ', $sshOptions).' '.escapeshellarg($username.$hostname).' exit;';
 
             $this->shell->execute($command, $deployment->getNode('localhost'), $deployment);
             $deployment->getLogger()->log('SSH connection successfully established', LOG_DEBUG);

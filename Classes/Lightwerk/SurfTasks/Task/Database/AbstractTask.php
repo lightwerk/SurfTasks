@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Database;
 
 /*                                                                        *
@@ -17,20 +18,20 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * Abstract Database Task
- *
- * @package Lightwerk\SurfTasks
+ * Abstract Database Task.
  */
 abstract class AbstractTask extends ExtbaseCommandTask
 {
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
      * @Flow\Inject
+     *
      * @var NodeFactory
      */
     protected $nodeFactory;
@@ -46,11 +47,13 @@ abstract class AbstractTask extends ExtbaseCommandTask
     protected $databaseArguments = ['user', 'password', 'host', 'socket', 'port', 'database'];
 
     /**
-     * @param Node $node
-     * @param Deployment $deployment
-     * @param array $options
+     * @param Node        $node
+     * @param Deployment  $deployment
+     * @param array       $options
      * @param Application $application
+     *
      * @return array|mixed
+     *
      * @throws TaskExecutionException
      * @throws InvalidConfigurationException
      */
@@ -70,27 +73,30 @@ abstract class AbstractTask extends ExtbaseCommandTask
         } else {
             $credentials = $options['db'];
         }
+
         return $credentials;
     }
 
     /**
-     * @param Node $node
-     * @param Deployment $deployment
-     * @param array $options
+     * @param Node        $node
+     * @param Deployment  $deployment
+     * @param array       $options
      * @param Application $application
+     *
      * @return array
+     *
      * @throws TaskExecutionException
      */
     protected function getCredentialsFromTypo3Cms(
         Node $node,
         Deployment $deployment,
-        array $options = [],
+        array $options,
         Application $application
     ) {
         $commands = $this->buildCommands($deployment, $application, 'coreapi', 'configurationapi:show DB', $options);
         if (empty($commands) === false) {
             // Overwrite first command
-            $commands[0] = 'cd ' . escapeshellarg($options['deploymentPath']);
+            $commands[0] = 'cd '.escapeshellarg($options['deploymentPath']);
         } else {
             throw new TaskExecutionException('Could not receive database credentials', 1409252547);
         }
@@ -120,28 +126,31 @@ abstract class AbstractTask extends ExtbaseCommandTask
                     break;
             }
         }
+
         return $credentials;
     }
 
     /**
      * @param array $options
      * @param array $credentials
+     *
      * @return string
      */
     protected function getDumpFile($options, $credentials)
     {
         if (empty($options['dumpPath']) === false) {
-            return $options['dumpPath'] . '/' . $credentials['database'] . '.sql.gz';
+            return $options['dumpPath'].'/'.$credentials['database'].'.sql.gz';
         } else {
-            return '/tmp/' . $credentials['database'] . '.sql.gz';
+            return '/tmp/'.$credentials['database'].'.sql.gz';
         }
     }
 
     /**
-     * Returns MySQL Arguments
+     * Returns MySQL Arguments.
      *
      * @param array $credentials
-     * @param bool $appendDatabase
+     * @param bool  $appendDatabase
+     *
      * @return string
      */
     protected function getMysqlArguments($credentials, $appendDatabase = true)
@@ -156,11 +165,11 @@ abstract class AbstractTask extends ExtbaseCommandTask
             if ($key === 'database') {
                 $database = $value;
             } else {
-                $arguments[$key] = '--' . $key . '=' . $value;
+                $arguments[$key] = '--'.$key.'='.$value;
             }
         }
         if ($appendDatabase === true) {
-            return implode(' ', $arguments) . ' ' . $database;
+            return implode(' ', $arguments).' '.$database;
         } else {
             return implode(' ', $arguments);
         }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Assets;
 
 /*                                                                        *
@@ -14,25 +15,23 @@ use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * @author Achim Fritz <af@lightwerk.com>
- * @package Lightwerk\SurfTasks
  */
 class NpmTask extends Task
 {
-
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -40,18 +39,17 @@ class NpmTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws TaskExecutionException
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
-
         if (isset($options['useApplicationWorkspace']) && $options['useApplicationWorkspace'] === true) {
             $rootPath = $deployment->getWorkspacePath($application);
         } else {
@@ -72,9 +70,9 @@ class NpmTask extends Task
         }
 
         $commands = [];
-        $commands[] = 'cd ' . escapeshellarg($rootPath);
-        $commands[] = 'if [ "`which npm`" != "" ] && [ -f "package.json" ]; then ' .
-            'npm install --loglevel error; ' .
+        $commands[] = 'cd '.escapeshellarg($rootPath);
+        $commands[] = 'if [ "`which npm`" != "" ] && [ -f "package.json" ]; then '.
+            'npm install --loglevel error; '.
             'fi';
 
         $this->shell->executeOrSimulate($commands, $node, $deployment);

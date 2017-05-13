@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
 
 /*                                                                        *
@@ -12,27 +13,24 @@ use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * Updates the database schema
- *
- * @package Lightwerk\SurfTasks
+ * Updates the database schema.
  */
 class UpdateDatabaseTask extends ExtbaseCommandTask
 {
-
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -40,13 +38,13 @@ class UpdateDatabaseTask extends ExtbaseCommandTask
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws TaskExecutionException
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
@@ -65,7 +63,7 @@ class UpdateDatabaseTask extends ExtbaseCommandTask
             $deployment,
             $application,
             'coreapi',
-            'databaseapi:databasecompare ' . escapeshellarg($actions),
+            'databaseapi:databasecompare '.escapeshellarg($actions),
             $options
         );
         if (count($commands) > 0) {

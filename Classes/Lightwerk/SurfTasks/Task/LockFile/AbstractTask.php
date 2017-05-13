@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\LockFile;
 
 /*                                                                        *
@@ -12,25 +13,22 @@ use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 
-/**
- * @package Lightwerk\SurfTasks
- */
 abstract class AbstractTask extends Task
 {
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -39,6 +37,7 @@ abstract class AbstractTask extends Task
 
     /**
      * @param array $options
+     *
      * @return string
      */
     protected function getFileName(array $options)
@@ -48,6 +47,7 @@ abstract class AbstractTask extends Task
 
     /**
      * @param array $options
+     *
      * @return string
      */
     protected function getTargetPath(array $options)

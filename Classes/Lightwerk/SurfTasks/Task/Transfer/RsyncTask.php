@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Transfer;
 
 /*                                                                        *
@@ -16,32 +17,31 @@ use TYPO3\Surf\Exception\TaskExecutionException;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
- * Rsync Task
- *
- * @package Lightwerk\SurfTasks
+ * Rsync Task.
  */
 class RsyncTask extends Task
 {
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
      * @Flow\Inject
+     *
      * @var RsyncService
      */
     protected $rsyncService;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -49,13 +49,13 @@ class RsyncTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param \TYPO3\Surf\Domain\Model\Node $node
+     * @param \TYPO3\Surf\Domain\Model\Node        $node
      * @param \TYPO3\Surf\Domain\Model\Application $application
-     * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param \TYPO3\Surf\Domain\Model\Deployment  $deployment
+     * @param array                                $options
+     *
      * @throws InvalidConfigurationException
      * @throws TaskExecutionException
      */

@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task;
 
 /*                                                                        *
@@ -13,27 +14,24 @@ use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 
 /**
- * Clears the OpCode Cache of PHP
- *
- * @package Lightwerk\SurfTasks
+ * Clears the OpCode Cache of PHP.
  */
 class ClearPhpCacheTask extends Task
 {
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Flow\Http\Client\Browser
      */
     protected $browser;
 
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Flow\Http\Client\CurlEngine
      */
     protected $browserRequestEngine;
 
-    /**
-     * @return void
-     */
     public function initializeObject()
     {
         $this->browserRequestEngine->setOption(CURLOPT_SSL_VERIFYPEER, false);
@@ -42,13 +40,12 @@ class ClearPhpCacheTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param \TYPO3\Surf\Domain\Model\Node $node
+     * @param \TYPO3\Surf\Domain\Model\Node        $node
      * @param \TYPO3\Surf\Domain\Model\Application $application
-     * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param \TYPO3\Surf\Domain\Model\Deployment  $deployment
+     * @param array                                $options
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -56,10 +53,11 @@ class ClearPhpCacheTask extends Task
     }
 
     /**
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws \TYPO3\Flow\Http\Client\InfiniteRedirectionException
      */
     protected function executeOrSimulate(
@@ -73,7 +71,7 @@ class ClearPhpCacheTask extends Task
         }
         $uris = is_array($options['clearPhpCacheUris']) ? $options['clearPhpCacheUris'] : [$options['clearPhpCacheUris']];
         foreach ($uris as $uri) {
-            $deployment->getLogger()->log('... (localhost): curl "' . $uri . '"', LOG_DEBUG);
+            $deployment->getLogger()->log('... (localhost): curl "'.$uri.'"', LOG_DEBUG);
             if ($deployment->isDryRun() === false) {
                 $this->browser->request($uri);
             }
@@ -81,13 +79,12 @@ class ClearPhpCacheTask extends Task
     }
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {

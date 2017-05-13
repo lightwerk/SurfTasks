@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Database;
 
 /*                                                                        *
@@ -14,9 +15,7 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * MySQL Dump Task
- *
- * @package Lightwerk\SurfTasks
+ * MySQL Dump Task.
  */
 class DumpTask extends AbstractTask
 {
@@ -40,18 +39,17 @@ class DumpTask extends AbstractTask
             'tx_extensionmanager_domain_model_extension' => true,
             'tx_l10nmgr_index' => true,
             'tx_solr_%' => true,
-            'tx_realurl_%' => true
+            'tx_realurl_%' => true,
         ],
         'dumpPath' => '',
         'fullDump' => false,
     ];
 
     /**
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -59,16 +57,16 @@ class DumpTask extends AbstractTask
     }
 
     /**
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws TaskExecutionException
      * @throws InvalidConfigurationException
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
-
         $options = array_replace_recursive($this->options, $options);
         if (empty($options['sourceNode']) === false) {
             $node = $this->nodeFactory->getNodeByArray($options['sourceNode']);
@@ -90,6 +88,7 @@ class DumpTask extends AbstractTask
 
     /**
      * @param array $options
+     *
      * @return array
      */
     protected function getTableLikes($options, $credentials)
@@ -102,41 +101,44 @@ class DumpTask extends AbstractTask
             if (!$enabled) {
                 continue;
             }
-            $tablesLike[] = 'Tables_in_' . $credentials['database'] . ' LIKE ' . escapeshellarg($table);
+            $tablesLike[] = 'Tables_in_'.$credentials['database'].' LIKE '.escapeshellarg($table);
         }
+
         return $tablesLike;
     }
 
     /**
      * @param string $mysqlArguments
-     * @param array $tableLikes
+     * @param array  $tableLikes
      * @param string $targetFile
+     *
      * @return string
      */
     protected function getDataTablesCommand($mysqlArguments, $tableLikes, $targetFile)
     {
         if (empty($tableLikes) === false) {
-            $dataTables = ' `mysql -N ' . $mysqlArguments . ' -e "SHOW TABLES WHERE NOT (' . implode(' OR ', $tableLikes) . ')" | awk \'{printf $1" "}\'`';
+            $dataTables = ' `mysql -N '.$mysqlArguments.' -e "SHOW TABLES WHERE NOT ('.implode(' OR ', $tableLikes).')" | awk \'{printf $1" "}\'`';
         } else {
             $dataTables = '';
         }
 
-        return 'mysqldump --single-transaction ' . $mysqlArguments . ' ' . $dataTables .
-        ' | gzip > ' . $targetFile;
+        return 'mysqldump --single-transaction '.$mysqlArguments.' '.$dataTables.
+        ' | gzip > '.$targetFile;
     }
 
     /**
      * @param string $mysqlArguments
-     * @param array $tableLikes
+     * @param array  $tableLikes
      * @param string $targetFile
+     *
      * @return string
      */
     protected function getStructureCommand($mysqlArguments, $tableLikes, $targetFile)
     {
-        $dataTables = ' `mysql -N ' . $mysqlArguments . ' -e "SHOW TABLES WHERE (' . implode(' OR ', $tableLikes) . ')" | awk \'{printf $1" "}\'`';
+        $dataTables = ' `mysql -N '.$mysqlArguments.' -e "SHOW TABLES WHERE ('.implode(' OR ', $tableLikes).')" | awk \'{printf $1" "}\'`';
 
-        return 'mysqldump --no-data --single-transaction ' . $mysqlArguments . ' --skip-add-drop-table ' . $dataTables .
-        ' | sed "s/^CREATE TABLE/CREATE TABLE IF NOT EXISTS/g"' .
-        ' | gzip >> ' . $targetFile;
+        return 'mysqldump --no-data --single-transaction '.$mysqlArguments.' --skip-add-drop-table '.$dataTables.
+        ' | sed "s/^CREATE TABLE/CREATE TABLE IF NOT EXISTS/g"'.
+        ' | gzip >> '.$targetFile;
     }
 }

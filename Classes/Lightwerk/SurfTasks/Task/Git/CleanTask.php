@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Git;
 
 /*                                                                        *
@@ -14,27 +15,24 @@ use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
- * Clean task
- *
- * @package Lightwerk\SurfTasks
+ * Clean task.
  */
 class CleanTask extends Task
 {
-
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -42,13 +40,13 @@ class CleanTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws InvalidConfigurationException
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
@@ -72,13 +70,12 @@ class CleanTask extends Task
         }
 
         $commands = [
-            'cd ' . escapeshellarg($gitRootPath),
-            'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
+            'cd '.escapeshellarg($gitRootPath),
+            'if [ -d \'.git\' ] && hash git 2>/dev/null; then '.
 //				'git clean ' . $quietFlag . ' -d -ff && ' .
-            'git checkout -- .; ' .
-            'fi;'
+            'git checkout -- .; '.
+            'fi;',
         ];
-
 
         $this->shell->executeOrSimulate($commands, $node, $deployment);
     }

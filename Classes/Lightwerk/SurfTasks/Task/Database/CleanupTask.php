@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Database;
 
 /*                                                                        *
@@ -15,18 +16,15 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * Database Dump Transfer Task
- *
- * @package Lightwerk\SurfTasks
+ * Database Dump Transfer Task.
  */
 class CleanupTask extends AbstractTask
 {
     /**
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -34,26 +32,25 @@ class CleanupTask extends AbstractTask
     }
 
     /**
-     * Executes the task
+     * Executes the task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws InvalidConfigurationException
      * @throws TaskExecutionException
-     * @return void
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
-
         $sourceNode = $this->nodeFactory->getNodeByArray($options['sourceNode']);
         $credentials = $this->getCredentials($sourceNode, $deployment, $options['sourceNodeOptions'], $application);
         $dumpFile = $this->getDumpFile($options['sourceNodeOptions'], $credentials);
-        $this->shell->executeOrSimulate('rm ' . $dumpFile, $sourceNode, $deployment);
+        $this->shell->executeOrSimulate('rm '.$dumpFile, $sourceNode, $deployment);
 
         $credentials = $this->getCredentials($node, $deployment, $options, $application);
         $dumpFile = $this->getDumpFile($options, $credentials);
-        $this->shell->executeOrSimulate('rm ' . $dumpFile, $node, $deployment);
+        $this->shell->executeOrSimulate('rm '.$dumpFile, $node, $deployment);
     }
 }

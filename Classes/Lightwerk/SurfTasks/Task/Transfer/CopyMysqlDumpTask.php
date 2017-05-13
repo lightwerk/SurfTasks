@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Transfer;
 
 /*                                                                        *
@@ -16,21 +17,20 @@ use TYPO3\Surf\Exception\TaskExecutionException;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
- * Copy MySQL Dump Task
- *
- * @package Lightwerk\SurfTasks
+ * Copy MySQL Dump Task.
  */
 class CopyMysqlDumpTask extends Task
 {
-
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
      * @Flow\Inject
+     *
      * @var NodeFactory
      */
     protected $nodeFactory;
@@ -46,13 +46,12 @@ class CopyMysqlDumpTask extends Task
     ];
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -60,15 +59,15 @@ class CopyMysqlDumpTask extends Task
     }
 
     /**
-     * Executes the task
+     * Executes the task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws InvalidConfigurationException
      * @throws TaskExecutionException
-     * @return void
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -81,16 +80,17 @@ class CopyMysqlDumpTask extends Task
 
         $source = $this->getArgument($sourceNode, $application, $options['sourcePath'], $options['sourceFile']);
         $target = $this->getArgument($node, $application, $options['targetPath'], $options['targetFile']);
-        $command = 'scp -o BatchMode=\'yes\' ' . $source . ' ' . $target;
+        $command = 'scp -o BatchMode=\'yes\' '.$source.' '.$target;
 
         $this->shell->executeOrSimulate($command, $node, $deployment);
     }
 
     /**
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param string $path
-     * @param string $file
+     * @param string      $path
+     * @param string      $file
+     *
      * @return string
      */
     protected function getArgument(Node $node, Application $application, $path, $file)
@@ -100,14 +100,14 @@ class CopyMysqlDumpTask extends Task
         if ($node->hasOption('username')) {
             $username = $node->getOption('username');
             if (!empty($username)) {
-                $argument .= $username . '@';
+                $argument .= $username.'@';
             }
         }
 
-        $argument .= $node->getHostname() . ':';
+        $argument .= $node->getHostname().':';
 
-        $argument .= rtrim($application->getReleasesPath(), '/') . '/';
-        $argument = rtrim($argument . $path, '/') . '/';
+        $argument .= rtrim($application->getReleasesPath(), '/').'/';
+        $argument = rtrim($argument.$path, '/').'/';
         $argument .= $file;
 
         return $argument;

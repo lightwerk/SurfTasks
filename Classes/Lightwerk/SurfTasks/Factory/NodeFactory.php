@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Factory;
 
 /*                                                                        *
@@ -11,16 +12,17 @@ use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
- * Node Factory
+ * Node Factory.
  *
  * @Flow\Scope("singleton")
- * @package Lightwerk\SurfTasks
  */
 class NodeFactory
 {
     /**
      * @param array $configuration
+     *
      * @return Node
+     *
      * @throws InvalidConfigurationException
      */
     public function getNodeByArray(array $configuration)
@@ -36,13 +38,14 @@ class NodeFactory
             if ($key === 'name') {
                 continue;
             }
-            $method = 'set' . ucfirst($key);
+            $method = 'set'.ucfirst($key);
             if (method_exists($node, $method)) {
                 $node->$method($value);
             } else {
                 $node->setOption($key, $value);
             }
         }
+
         return $node;
     }
 }

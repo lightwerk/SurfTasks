@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task;
 
 /*                                                                        *
@@ -14,26 +15,24 @@ use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * Writes a deployment log on target server
- *
- * @package Lightwerk\SurfTasks
+ * Writes a deployment log on target server.
  */
 class DeploymentLogTask extends Task
 {
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -41,13 +40,13 @@ class DeploymentLogTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param \TYPO3\Surf\Domain\Model\Node $node
+     * @param \TYPO3\Surf\Domain\Model\Node        $node
      * @param \TYPO3\Surf\Domain\Model\Application $application
-     * @param \TYPO3\Surf\Domain\Model\Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param \TYPO3\Surf\Domain\Model\Deployment  $deployment
+     * @param array                                $options
+     *
      * @throws TaskExecutionException
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
@@ -57,25 +56,25 @@ class DeploymentLogTask extends Task
         $optionsToLog = !empty($options['deploymentLogOptions']) ? $options['deploymentLogOptions'] : [
             'tag',
             'branch',
-            'sha1'
+            'sha1',
         ];
 
         $logContent = [
             date('Y-m-d H:i:s (D)'),
-            'Application: ' . $application->getName(),
-            'Deployment: ' . $deployment->getName(),
-            'Status: ' . $deployment->getStatus(),
+            'Application: '.$application->getName(),
+            'Deployment: '.$deployment->getName(),
+            'Status: '.$deployment->getStatus(),
         ];
 
         foreach ($optionsToLog as $key) {
             if (!empty($options[$key])) {
-                $logContent[] = $key . ' = ' . $options[$key];
+                $logContent[] = $key.' = '.$options[$key];
             }
         }
 
         $commands = [
-            'cd ' . escapeshellarg($application->getReleasesPath()),
-            'echo ' . escapeshellarg(implode(' | ', $logContent)) . ' >> ' . rtrim($targetPath, '/') . '/' . $fileName
+            'cd '.escapeshellarg($application->getReleasesPath()),
+            'echo '.escapeshellarg(implode(' | ', $logContent)).' >> '.rtrim($targetPath, '/').'/'.$fileName,
         ];
         $this->shell->executeOrSimulate($commands, $node, $deployment);
     }

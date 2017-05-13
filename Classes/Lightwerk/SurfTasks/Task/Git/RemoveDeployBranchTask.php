@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Git;
 
 /*                                                                        *
@@ -14,27 +15,24 @@ use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
- * Removes the deploy branch of surf
- *
- * @package Lightwerk\SurfTasks
+ * Removes the deploy branch of surf.
  */
 class RemoveDeployBranchTask extends Task
 {
-
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -42,13 +40,13 @@ class RemoveDeployBranchTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws InvalidConfigurationException
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
@@ -60,11 +58,11 @@ class RemoveDeployBranchTask extends Task
         $quietFlag = (isset($options['verbose']) && $options['verbose']) ? '' : '-q';
 
         $commands = [];
-        $commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-        $commands[] = 'if [ -d \'.git\' ] && hash git 2>/dev/null; then ' .
-            'git branch -f ' . escapeshellarg($options['branch']) . ' deploy && ' .
-            'git checkout ' . $quietFlag . ' ' . escapeshellarg($options['branch']) . ' && ' .
-            'git branch -D deploy; ' .
+        $commands[] = 'cd '.escapeshellarg($deployment->getApplicationReleasePath($application));
+        $commands[] = 'if [ -d \'.git\' ] && hash git 2>/dev/null; then '.
+            'git branch -f '.escapeshellarg($options['branch']).' deploy && '.
+            'git checkout '.$quietFlag.' '.escapeshellarg($options['branch']).' && '.
+            'git branch -D deploy; '.
             'fi;';
 
         $this->shell->executeOrSimulate($commands, $node, $deployment);

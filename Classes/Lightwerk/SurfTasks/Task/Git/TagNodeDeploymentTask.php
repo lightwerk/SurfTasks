@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Git;
 
 /*                                                                        *
@@ -15,33 +16,30 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * Tags the deployed commit with the node name
+ * Tags the deployed commit with the node name.
  *
  * "options": {
  *   "disableDeploymentTag": false,
  *   "deploymentTag": "server-",
  *   "nodeName": ""
  * }
- *
- * @package Lightwerk\SurfTasks
  */
 class TagNodeDeploymentTask extends Task
 {
-
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -49,13 +47,13 @@ class TagNodeDeploymentTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws InvalidConfigurationException
      * @throws TaskExecutionException
      */
@@ -72,7 +70,7 @@ class TagNodeDeploymentTask extends Task
         }
 
         $tagPrefix = isset($options['deploymentTagPrefix']) ? $options['deploymentTagPrefix'] : 'server-';
-        $tagName = preg_replace('/[^a-zA-Z0-9-_\.]*/', '', $tagPrefix . $node->getName());
+        $tagName = preg_replace('/[^a-zA-Z0-9-_\.]*/', '', $tagPrefix.$node->getName());
         $quietFlag = (isset($options['verbose']) && $options['verbose']) ? '' : '-q';
 
         if (!empty($options['nodeName'])) {
@@ -86,9 +84,9 @@ class TagNodeDeploymentTask extends Task
         }
 
         $commands = [
-            'cd ' . escapeshellarg($gitRootPath),
-            'git tag --force -- ' . escapeshellarg($tagName),
-            'git push origin --force ' . $quietFlag . ' -- ' . escapeshellarg($tagName),
+            'cd '.escapeshellarg($gitRootPath),
+            'git tag --force -- '.escapeshellarg($tagName),
+            'git push origin --force '.$quietFlag.' -- '.escapeshellarg($tagName),
         ];
         $this->shell->executeOrSimulate($commands, $node, $deployment);
     }

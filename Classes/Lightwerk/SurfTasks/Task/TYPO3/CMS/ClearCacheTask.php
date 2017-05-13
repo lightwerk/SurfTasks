@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
 
 /*                                                                        *
@@ -12,45 +13,45 @@ use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * Clears caches in the database and the filesystem
- *
- * @package Lightwerk\SurfTasks
+ * Clears caches in the database and the filesystem.
  */
-class ClearCacheTask extends ExtbaseCommandTask {
+class ClearCacheTask extends ExtbaseCommandTask
+{
+    /**
+     * @Flow\Inject
+     *
+     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     */
+    protected $shell;
 
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-	 */
-	protected $shell;
+    /**
+     * Executes this task.
+     *
+     * @param Node        $node
+     * @param Application $application
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
+     * @throws TaskExecutionException
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = array())
+    {
+        $commands = $this->buildCommands($deployment, $application, 'coreapi', 'cacheapi:clearallcaches -hard true', $options);
+        if (count($commands) > 0) {
+            $this->shell->executeOrSimulate($commands, $node, $deployment);
+        }
+    }
 
-	/**
-	 * Executes this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 * @throws TaskExecutionException
-	 */
-	public function execute(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$commands = $this->buildCommands($deployment, $application, 'coreapi', 'cacheapi:clearallcaches -hard true', $options);
-		if (count($commands) > 0) {
-			$this->shell->executeOrSimulate($commands, $node, $deployment);
-		}
-	}
-
-	/**
-	 * Simulate this task
-	 *
-	 * @param Node $node
-	 * @param Application $application
-	 * @param Deployment $deployment
-	 * @param array $options
-	 * @return void
-	 */
-	public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array()) {
-		$this->execute($node, $application, $deployment, $options);
-	}
+    /**
+     * Simulate this task.
+     *
+     * @param Node        $node
+     * @param Application $application
+     * @param Deployment  $deployment
+     * @param array       $options
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array())
+    {
+        $this->execute($node, $application, $deployment, $options);
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Service;
 
 /*                                                                        *
@@ -9,15 +10,15 @@ namespace Lightwerk\SurfTasks\Service;
 use TYPO3\Flow\Annotations as Flow;
 
 /**
- * Mysql Service
+ * Mysql Service.
  *
  * @Flow\Scope("singleton")
- * @package Lightwerk\SurfTasks
  */
 class MysqlService
 {
     /**
      * @param array $options
+     *
      * @return string
      */
     public function getMysqlArguments($options)
@@ -31,15 +32,16 @@ class MysqlService
             }
             $value = escapeshellarg($options[$key]);
             if (strlen($key) === 1) {
-                $arguments[$key] = '-' . $key . ' ' . $value;
+                $arguments[$key] = '-'.$key.' '.$value;
             } else {
-                $arguments[$key] = '--' . $key . '=' . $value;
+                $arguments[$key] = '--'.$key.'='.$value;
             }
         }
 
         if (!empty($options['database'])) {
             $arguments[] = $options['database'];
         }
+
         return implode(' ', $arguments);
     }
 }

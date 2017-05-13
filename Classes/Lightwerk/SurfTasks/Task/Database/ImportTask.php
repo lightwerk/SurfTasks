@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Database;
 
 /*                                                                        *
@@ -14,9 +15,7 @@ use TYPO3\Surf\Exception\TaskExecutionException;
 use TYPO3\Surf\Exception\InvalidConfigurationException;
 
 /**
- * MySQL Import Task
- *
- * @package Lightwerk\SurfTasks
+ * MySQL Import Task.
  */
 class ImportTask extends AbstractTask
 {
@@ -30,11 +29,10 @@ class ImportTask extends AbstractTask
     ];
 
     /**
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -42,11 +40,11 @@ class ImportTask extends AbstractTask
     }
 
     /**
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws InvalidConfigurationException
      * @throws TaskExecutionException
      */
@@ -60,11 +58,11 @@ class ImportTask extends AbstractTask
         $mysqlAuthArguments = $this->getMysqlArguments($credentials, false);
 
         $commands = [];
-        $commands[] = 'echo "CREATE DATABASE IF NOT EXISTS ' . $credentials['database'] .
-            ' DEFAULT CHARACTER SET = \'utf8\'' .
-            ' DEFAULT COLLATE \'utf8_general_ci\'"' .
-            ' | mysql ' . $mysqlAuthArguments;
-        $commands[] = 'gzip -d < ' . escapeshellarg($dumpFile) . ' | mysql ' . $mysqlArguments;
+        $commands[] = 'echo "CREATE DATABASE IF NOT EXISTS '.$credentials['database'].
+            ' DEFAULT CHARACTER SET = \'utf8\''.
+            ' DEFAULT COLLATE \'utf8_general_ci\'"'.
+            ' | mysql '.$mysqlAuthArguments;
+        $commands[] = 'gzip -d < '.escapeshellarg($dumpFile).' | mysql '.$mysqlArguments;
         if (!empty($options['truncateTables']) && is_array($options['truncateTables'])) {
             $commands[] = $this->getTruncateCommand($mysqlArguments, $options);
         }
@@ -74,7 +72,8 @@ class ImportTask extends AbstractTask
 
     /**
      * @param string $mysqlArguments
-     * @param array $options
+     * @param array  $options
+     *
      * @return string
      */
     protected function getTruncateCommand($mysqlArguments, array $options)
@@ -82,10 +81,10 @@ class ImportTask extends AbstractTask
         $truncates = [];
         foreach ($options['truncateTables'] as $table => $enabled) {
             if ($enabled) {
-                $truncates = 'TRUNCATE ' . escapeshellarg($table);
+                $truncates = 'TRUNCATE '.escapeshellarg($table);
             }
         }
 
-        return 'mysql -N ' . $mysqlArguments . ' -e "' . implode('; ', $truncates) . '"';
+        return 'mysql -N '.$mysqlArguments.' -e "'.implode('; ', $truncates).'"';
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Lightwerk\SurfTasks\Task\Assets;
 
 /*                                                                        *
@@ -15,27 +16,24 @@ use TYPO3\Surf\Exception\InvalidConfigurationException;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
- * Runs gulp tasks
- *
- * @package Lightwerk\SurfTasks
+ * Runs gulp tasks.
  */
 class GulpTask extends Task
 {
-
     /**
      * @Flow\Inject
+     *
      * @var \TYPO3\Surf\Domain\Service\ShellCommandService
      */
     protected $shell;
 
     /**
-     * Simulate this task
+     * Simulate this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -43,13 +41,13 @@ class GulpTask extends Task
     }
 
     /**
-     * Executes this task
+     * Executes this task.
      *
-     * @param Node $node
+     * @param Node        $node
      * @param Application $application
-     * @param Deployment $deployment
-     * @param array $options
-     * @return void
+     * @param Deployment  $deployment
+     * @param array       $options
+     *
      * @throws InvalidConfigurationException
      * @throws TaskExecutionException
      */
@@ -75,9 +73,9 @@ class GulpTask extends Task
         }
 
         $commands = [];
-        $commands[] = 'cd ' . escapeshellarg($rootPath);
-        $commands[] = 'if hash gulp 2>/dev/null && [ -f gulpfile.js ]; then ' .
-            'gulp build; ' .
+        $commands[] = 'cd '.escapeshellarg($rootPath);
+        $commands[] = 'if hash gulp 2>/dev/null && [ -f gulpfile.js ]; then '.
+            'gulp build; '.
             'fi;';
 
         $this->shell->executeOrSimulate($commands, $node, $deployment);
