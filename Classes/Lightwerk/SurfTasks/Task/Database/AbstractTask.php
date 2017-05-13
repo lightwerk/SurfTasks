@@ -93,7 +93,7 @@ abstract class AbstractTask extends ExtbaseCommandTask
         array $options,
         Application $application
     ) {
-        $commands = $this->buildCommands($deployment, $application, 'coreapi', 'configurationapi:show DB', $options);
+        $commands = $this->buildCommands($deployment, $application, $options);
         if (empty($commands) === false) {
             // Overwrite first command
             $commands[0] = 'cd '.escapeshellarg($options['deploymentPath']);
@@ -102,7 +102,15 @@ abstract class AbstractTask extends ExtbaseCommandTask
         }
 
         $returnedOutput = $this->shell->execute($commands, $node, $deployment, false, false);
-        $returnedOutput = json_decode($returnedOutput, true);
+        switch ($this->commandProviderService->getDetectedCommandProvider($deployment, $application)) {
+            case 'coreapi':
+                $returnedOutput = json_decode($returnedOutput, true);
+                break;
+            case 'typo3-console':
+                $returnedOutput = $returnedOutput[0];
+                break;
+        }
+
         if (empty($returnedOutput)) {
             throw new TaskExecutionException('Could not receive database credentials', 1409252546);
         }
@@ -173,5 +181,23 @@ abstract class AbstractTask extends ExtbaseCommandTask
         } else {
             return implode(' ', $arguments);
         }
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    protected function getCoreapiArguments(array $options)
+    {
+        return 'configurationapi:show DB';
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    protected function getTypo3ConsoleArguments(array $options)
+    {
+        return 'configuration:showactive DB';
     }
 }
