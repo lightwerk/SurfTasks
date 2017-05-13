@@ -19,46 +19,20 @@ use TYPO3\Surf\Exception\TaskExecutionException;
 class CreateUploadFoldersTask extends ExtbaseCommandTask
 {
     /**
-     * @Flow\Inject
-     *
-     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     * @param array $options
+     * @return string
      */
-    protected $shell;
-
-    /**
-     * Simulate this task.
-     *
-     * @param Node        $node
-     * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
-     */
-    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    protected function getCoreapiArguments(array $options)
     {
-        $this->execute($node, $application, $deployment, $options);
+        return 'extensionapi:createuploadfolders';
     }
 
     /**
-     * Executes this task.
-     *
-     * @param Node        $node
-     * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
-     *
-     * @throws TaskExecutionException
+     * @param array $options
+     * @return string
      */
-    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    protected function getTypo3ConsoleArguments(array $options)
     {
-        $commands = $this->buildCommands(
-            $deployment,
-            $application,
-            'coreapi',
-            'extensionapi:createuploadfolders',
-            $options
-        );
-        if (count($commands) > 0) {
-            $this->shell->executeOrSimulate($commands, $node, $deployment);
-        }
+        return 'extension:setupactive';
     }
 }

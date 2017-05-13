@@ -6,48 +6,16 @@ namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
  * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTasks".   *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Surf\Domain\Model\Application;
-use TYPO3\Surf\Domain\Model\Deployment;
-use TYPO3\Surf\Domain\Model\Node;
-use TYPO3\Surf\Exception\TaskExecutionException;
-
 /**
  * Updates the database schema.
  */
 class UpdateDatabaseTask extends ExtbaseCommandTask
 {
     /**
-     * @Flow\Inject
-     *
-     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     * @param array $options
+     * @return string
      */
-    protected $shell;
-
-    /**
-     * Simulate this task.
-     *
-     * @param Node        $node
-     * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
-     */
-    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
-    {
-        $this->execute($node, $application, $deployment, $options);
-    }
-
-    /**
-     * Executes this task.
-     *
-     * @param Node        $node
-     * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
-     *
-     * @throws TaskExecutionException
-     */
-    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    protected function getCoreapiArguments(array $options)
     {
         // Actions:
         // * 1 = ACTION_UPDATE_CLEAR_TABLE
@@ -59,15 +27,25 @@ class UpdateDatabaseTask extends ExtbaseCommandTask
         //   7 = ACTION_REMOVE_CHANGE_TABLE
         //   8 = ACTION_REMOVE_DROP_TABLE
         $actions = !empty($options['updateDatabaseActions']) ? $options['updateDatabaseActions'] : '1,2,3,4';
-        $commands = $this->buildCommands(
-            $deployment,
-            $application,
-            'coreapi',
-            'databaseapi:databasecompare '.escapeshellarg($actions),
-            $options
-        );
-        if (count($commands) > 0) {
-            $this->shell->executeOrSimulate($commands, $node, $deployment);
-        }
+        return 'databaseapi:databasecompare ' . escapeshellarg($actions);
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    protected function getTypo3ConsoleArguments(array $options)
+    {
+        // Actions:
+        // * FIELD_ADD
+        // * FIELD_CHANGE
+        //   FIELD_PREFIX
+        //   FIELD_DROP
+        // * TABLE_ADD
+        // * TABLE_CHANGE
+        //   TABLE_PREFIX
+        //   TABLE_DROP
+        $actions = !empty($options['updateDatabaseActions']) ? $options['updateDatabaseActions'] : 'field.add, field.change, table.add, table.change';
+        return 'database:updateschema' . escapeshellarg($actions);
     }
 }

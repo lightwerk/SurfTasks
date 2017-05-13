@@ -25,13 +25,6 @@ class SyncSharedTask extends ExtbaseCommandTask
     /**
      * @Flow\Inject
      *
-     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
-     */
-    protected $shell;
-
-    /**
-     * @Flow\Inject
-     *
      * @var RsyncService
      */
     protected $rsyncService;
@@ -119,7 +112,7 @@ class SyncSharedTask extends ExtbaseCommandTask
             } else {
                 throw new InvalidConfigurationException('No deploymentPath defined!', 1414849872);
             }
-            $webDir = $this->getWebDir($deployment, $application);
+            $webDir = $this->commandProviderService->getWebDir($deployment, $application);
             if ($webDir !== '') {
                 $deploymentPath = rtrim($deploymentPath, '/').'/'.$webDir;
             }
@@ -165,5 +158,23 @@ class SyncSharedTask extends ExtbaseCommandTask
             $deployment,
             $options
         );
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    protected function getCoreapiArguments(array $options)
+    {
+        return '';
+    }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    protected function getTypo3ConsoleArguments(array $options)
+    {
+        return '';
     }
 }

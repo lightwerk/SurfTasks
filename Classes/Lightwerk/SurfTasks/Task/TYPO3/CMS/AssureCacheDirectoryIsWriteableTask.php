@@ -7,55 +7,23 @@ namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
  *                                                                        *
  *                                                                        */
 
-use TYPO3\Surf\Domain\Model\Node;
-use TYPO3\Surf\Domain\Model\Application;
-use TYPO3\Surf\Domain\Model\Deployment;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Surf\Exception\TaskExecutionException;
-
 class AssureCacheDirectoryIsWriteableTask extends ExtbaseCommandTask
 {
     /**
-     * @Flow\Inject
-     *
-     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     * @param array $options
+     * @return string
      */
-    protected $shell;
-
-    /**
-     * Simulate this task.
-     *
-     * @param Node        $node
-     * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
-     */
-    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    protected function getCoreapiArguments(array $options): string
     {
-        $this->execute($node, $application, $deployment, $options);
+        return 'cacheapi:assurecachedirectoryiswriteable';
     }
 
     /**
-     * Executes this task.
-     *
-     * @param Node        $node
-     * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
-     *
-     * @throws TaskExecutionException
+     * @param array $options
+     * @return string
      */
-    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    protected function getTypo3ConsoleArguments(array $options): string
     {
-        $commands = $this->buildCommands(
-            $deployment,
-            $application,
-            'coreapi',
-            'cacheapi:assurecachedirectoryiswriteable',
-            $options
-        );
-        if (count($commands) > 0) {
-            $this->shell->executeOrSimulate($commands, $node, $deployment);
-        }
+        return '';
     }
 }

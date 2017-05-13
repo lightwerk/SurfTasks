@@ -6,52 +6,26 @@ namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
  * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTasks".   *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Surf\Domain\Model\Application;
-use TYPO3\Surf\Domain\Model\Deployment;
-use TYPO3\Surf\Domain\Model\Node;
-use TYPO3\Surf\Exception\TaskExecutionException;
-
 /**
  * Clears caches in the database and the filesystem.
  */
 class ClearCacheTask extends ExtbaseCommandTask
 {
     /**
-     * @Flow\Inject
-     *
-     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     * @param array $options
+     * @return string
      */
-    protected $shell;
-
-    /**
-     * Executes this task.
-     *
-     * @param Node        $node
-     * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
-     *
-     * @throws TaskExecutionException
-     */
-    public function execute(Node $node, Application $application, Deployment $deployment, array $options = array())
+    protected function getCoreapiArguments(array $options)
     {
-        $commands = $this->buildCommands($deployment, $application, 'coreapi', 'cacheapi:clearallcaches -hard true', $options);
-        if (count($commands) > 0) {
-            $this->shell->executeOrSimulate($commands, $node, $deployment);
-        }
+        return 'cacheapi:clearallcaches -hard true';
     }
 
     /**
-     * Simulate this task.
-     *
-     * @param Node        $node
-     * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
+     * @param array $options
+     * @return string
      */
-    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = array())
+    protected function getTypo3ConsoleArguments(array $options)
     {
-        $this->execute($node, $application, $deployment, $options);
+        return 'cache:flush --force';
     }
 }

@@ -6,10 +6,14 @@ namespace Lightwerk\SurfTasks\Task\TYPO3\CMS;
  * This script belongs to the TYPO3 Flow package "Lightwerk.SurfTasks".   *
  *                                                                        */
 
+use Lightwerk\SurfTasks\Service\CommandProviderException;
+use Lightwerk\SurfTasks\Service\CommandProviderService;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Application;
+use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
  * Creates the command for an extbase command.
@@ -17,27 +21,81 @@ use TYPO3\Surf\Domain\Model\Application;
 abstract class ExtbaseCommandTask extends Task
 {
     /**
-     * @param Deployment  $deployment
+     * @Flow\Inject
+     * @var \TYPO3\Surf\Domain\Service\ShellCommandService
+     */
+    protected $shell;
+
+    /**
+     * @Flow\Inject
+     * @var CommandProviderService
+     */
+    protected $commandProviderService;
+
+    /**
+     * Executes this task.
+     *
+     * @param Node        $node
      * @param Application $application
-     * @param string      $extensionName
-     * @param string      $arguments
+     * @param Deployment  $deployment
      * @param array       $options
      *
+     * @throws TaskExecutionException
+     */
+    public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $commands = $this->buildCommands(
+            $deployment,
+            $application,
+            $options
+        );
+        if (count($commands) > 0) {
+            $this->shell->executeOrSimulate($commands, $node, $deployment);
+        }
+    }
+
+    /**
+     * Simulate this task.
+     *
+     * @param Node        $node
+     * @param Application $application
+     * @param Deployment  $deployment
+     * @param array       $options
+     */
+    public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
+    {
+        $this->execute($node, $application, $deployment, $options);
+    }
+
+    /**
+     * @param Deployment $deployment
+     * @param Application $application
+     * @param array $options
+     *
      * @return array
+     * @throws CommandProviderException
      */
     protected function buildCommands(
         Deployment $deployment,
         Application $application,
-        $extensionName,
-        $arguments,
         $options = []
     ) {
         $commands = [];
-        $command = $this->buildCommand($deployment, $application, $extensionName, $arguments);
+        switch ($this->commandProviderService->getDetectedCommandProvider($deployment, $application)) {
+            case 'coreapi':
+                $command = $this->buildCoreapiCommand($deployment, $application, $options);
+                break;
+            case 'typo3-console':
+                $command = $this->buildTypo3ConsoleCommand($deployment, $application, $options);
+                break;
+            default:
+                throw new CommandProviderException('No command was build for the detected command provider.' . 1494672441);
+        }
+
         if ($command !== '') {
-            $commands[] = 'cd '.escapeshellarg($deployment->getApplicationReleasePath($application));
+            $commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
             if (!empty($options['context'])) {
-                $commands[] = 'export TYPO3_CONTEXT='.escapeshellarg($options['context']);
+                $commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
             }
             $commands[] = $command;
         }
@@ -46,43 +104,46 @@ abstract class ExtbaseCommandTask extends Task
     }
 
     /**
-     * @param Deployment  $deployment
+     * @param Deployment $deployment
      * @param Application $application
-     * @param string      $extensionName
-     * @param string      $arguments
-     *
+     * @param array $options
      * @return string
      */
-    protected function buildCommand(Deployment $deployment, Application $application, $extensionName, $arguments)
+    protected function buildCoreapiCommand(Deployment $deployment, Application $application, array $options): string
     {
-        $command = '';
-        $webDir = $this->getWebDir($deployment, $application);
-        $rootPath = $deployment->getWorkspacePath($application).'/'.$webDir;
-        if (is_dir($rootPath.'/typo3conf/ext/'.$extensionName) === true) {
-            $command = $webDir.'typo3/cli_dispatch.phpsh extbase '.$arguments;
+        $arguments = $this->getCoreapiArguments($options);
+        if (empty($arguments)) {
+            return '';
         }
-
-        return $command;
+        return $this->commandProviderService->getWebDir($deployment, $application)
+            . 'typo3/cli_dispatch.phpsh extbase '
+            . $arguments;
     }
 
     /**
-     * @param Deployment  $deployment
+     * @param Deployment $deployment
      * @param Application $application
-     *
+     * @param array $options
      * @return string
      */
-    protected function getWebDir(Deployment $deployment, Application $application)
+    private function buildTypo3ConsoleCommand(Deployment $deployment, Application $application, array $options): string
     {
-        $webDir = '';
-        $rootPath = $deployment->getWorkspacePath($application);
-        $composerFile = $rootPath.'/composer.json';
-        if (file_exists($composerFile) === true) {
-            $json = json_decode(file_get_contents($composerFile), true);
-            if ($json !== null && empty($json['extra']['typo3/cms']['web-dir']) === false) {
-                return rtrim($json['extra']['typo3/cms']['web-dir'], '/').'/';
-            }
+        $arguments = $this->getTypo3ConsoleArguments($options);
+        if (empty($arguments)) {
+            return '';
         }
-
-        return $webDir;
+        return $deployment->getWorkspacePath($application) . '/vendor/bin/typo3cms ' . $arguments;
     }
+
+    /**
+     * @param array $options
+     * @return string
+     */
+    abstract protected function getCoreapiArguments(array $options);
+
+    /**
+     * @param array $options
+    * @return string
+    */
+    abstract protected function getTypo3ConsoleArguments(array $options);
 }
