@@ -46,10 +46,10 @@ class DumpTask extends AbstractTask
     ];
 
     /**
-     * @param Node        $node
+     * @param Node $node
      * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
+     * @param Deployment $deployment
+     * @param array $options
      */
     public function simulate(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -57,10 +57,10 @@ class DumpTask extends AbstractTask
     }
 
     /**
-     * @param Node        $node
+     * @param Node $node
      * @param Application $application
-     * @param Deployment  $deployment
-     * @param array       $options
+     * @param Deployment $deployment
+     * @param array $options
      *
      * @throws TaskExecutionException
      * @throws InvalidConfigurationException
@@ -101,7 +101,7 @@ class DumpTask extends AbstractTask
             if (!$enabled) {
                 continue;
             }
-            $tablesLike[] = 'Tables_in_'.$credentials['database'].' LIKE '.escapeshellarg($table);
+            $tablesLike[] = 'Tables_in_' . $credentials['database'] . ' LIKE ' . escapeshellarg($table);
         }
 
         return $tablesLike;
@@ -109,7 +109,7 @@ class DumpTask extends AbstractTask
 
     /**
      * @param string $mysqlArguments
-     * @param array  $tableLikes
+     * @param array $tableLikes
      * @param string $targetFile
      *
      * @return string
@@ -117,28 +117,28 @@ class DumpTask extends AbstractTask
     protected function getDataTablesCommand($mysqlArguments, $tableLikes, $targetFile)
     {
         if (empty($tableLikes) === false) {
-            $dataTables = ' `mysql -N '.$mysqlArguments.' -e "SHOW TABLES WHERE NOT ('.implode(' OR ', $tableLikes).')" | awk \'{printf $1" "}\'`';
+            $dataTables = ' `mysql -N ' . $mysqlArguments . ' -e "SHOW TABLES WHERE NOT (' . implode(' OR ', $tableLikes) . ')" | awk \'{printf $1" "}\'`';
         } else {
             $dataTables = '';
         }
 
-        return 'mysqldump --single-transaction '.$mysqlArguments.' '.$dataTables.
-        ' | gzip > '.$targetFile;
+        return 'mysqldump --single-transaction ' . $mysqlArguments . ' ' . $dataTables .
+            ' | gzip > ' . $targetFile;
     }
 
     /**
      * @param string $mysqlArguments
-     * @param array  $tableLikes
+     * @param array $tableLikes
      * @param string $targetFile
      *
      * @return string
      */
     protected function getStructureCommand($mysqlArguments, $tableLikes, $targetFile)
     {
-        $dataTables = ' `mysql -N '.$mysqlArguments.' -e "SHOW TABLES WHERE ('.implode(' OR ', $tableLikes).')" | awk \'{printf $1" "}\'`';
+        $dataTables = ' `mysql -N ' . $mysqlArguments . ' -e "SHOW TABLES WHERE (' . implode(' OR ', $tableLikes) . ')" | awk \'{printf $1" "}\'`';
 
-        return 'mysqldump --no-data --single-transaction '.$mysqlArguments.' --skip-add-drop-table '.$dataTables.
-        ' | sed "s/^CREATE TABLE/CREATE TABLE IF NOT EXISTS/g"'.
-        ' | gzip >> '.$targetFile;
+        return 'mysqldump --no-data --single-transaction ' . $mysqlArguments . ' --skip-add-drop-table ' . $dataTables .
+            ' | sed "s/^CREATE TABLE/CREATE TABLE IF NOT EXISTS/g"' .
+            ' | gzip >> ' . $targetFile;
     }
 }

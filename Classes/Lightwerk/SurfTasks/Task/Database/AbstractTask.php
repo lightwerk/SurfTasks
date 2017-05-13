@@ -47,9 +47,9 @@ abstract class AbstractTask extends ExtbaseCommandTask
     protected $databaseArguments = ['user', 'password', 'host', 'socket', 'port', 'database'];
 
     /**
-     * @param Node        $node
-     * @param Deployment  $deployment
-     * @param array       $options
+     * @param Node $node
+     * @param Deployment $deployment
+     * @param array $options
      * @param Application $application
      *
      * @return array|mixed
@@ -78,9 +78,9 @@ abstract class AbstractTask extends ExtbaseCommandTask
     }
 
     /**
-     * @param Node        $node
-     * @param Deployment  $deployment
-     * @param array       $options
+     * @param Node $node
+     * @param Deployment $deployment
+     * @param array $options
      * @param Application $application
      *
      * @return array
@@ -92,11 +92,12 @@ abstract class AbstractTask extends ExtbaseCommandTask
         Deployment $deployment,
         array $options,
         Application $application
-    ) {
+    )
+    {
         $commands = $this->buildCommands($deployment, $application, $options);
         if (empty($commands) === false) {
             // Overwrite first command
-            $commands[0] = 'cd '.escapeshellarg($options['deploymentPath']);
+            $commands[0] = 'cd ' . escapeshellarg($options['deploymentPath']);
         } else {
             throw new TaskExecutionException('Could not receive database credentials', 1409252547);
         }
@@ -147,9 +148,9 @@ abstract class AbstractTask extends ExtbaseCommandTask
     protected function getDumpFile($options, $credentials)
     {
         if (empty($options['dumpPath']) === false) {
-            return $options['dumpPath'].'/'.$credentials['database'].'.sql.gz';
+            return $options['dumpPath'] . '/' . $credentials['database'] . '.sql.gz';
         } else {
-            return '/tmp/'.$credentials['database'].'.sql.gz';
+            return '/tmp/' . $credentials['database'] . '.sql.gz';
         }
     }
 
@@ -157,7 +158,7 @@ abstract class AbstractTask extends ExtbaseCommandTask
      * Returns MySQL Arguments.
      *
      * @param array $credentials
-     * @param bool  $appendDatabase
+     * @param bool $appendDatabase
      *
      * @return string
      */
@@ -173,11 +174,11 @@ abstract class AbstractTask extends ExtbaseCommandTask
             if ($key === 'database') {
                 $database = $value;
             } else {
-                $arguments[$key] = '--'.$key.'='.$value;
+                $arguments[$key] = '--' . $key . '=' . $value;
             }
         }
         if ($appendDatabase === true) {
-            return implode(' ', $arguments).' '.$database;
+            return implode(' ', $arguments) . ' ' . $database;
         } else {
             return implode(' ', $arguments);
         }

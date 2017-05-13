@@ -86,7 +86,7 @@ abstract class ExtbaseCommandTask extends Task
                 $command = $this->buildCoreapiCommand($deployment, $application, $options);
                 break;
             case 'typo3-console':
-                $command = $this->buildTypo3ConsoleCommand($deployment, $application, $options);
+                $command = $this->buildTypo3ConsoleCommand($options);
                 break;
             default:
                 throw new CommandProviderException('No command was build for the detected command provider.' . 1494672441);
@@ -121,18 +121,16 @@ abstract class ExtbaseCommandTask extends Task
     }
 
     /**
-     * @param Deployment $deployment
-     * @param Application $application
      * @param array $options
      * @return string
      */
-    private function buildTypo3ConsoleCommand(Deployment $deployment, Application $application, array $options): string
+    private function buildTypo3ConsoleCommand(array $options): string
     {
         $arguments = $this->getTypo3ConsoleArguments($options);
         if (empty($arguments)) {
             return '';
         }
-        return $deployment->getWorkspacePath($application) . '/vendor/bin/typo3cms ' . $arguments;
+        return 'vendor/bin/typo3cms ' . $arguments;
     }
 
     /**
