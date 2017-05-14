@@ -5,16 +5,19 @@ namespace Lightwerk\SurfTasks\Tests\Unit\Task\TYPO3\CMS;
  * This script belongs to the TYPO3 Flow package "TYPO3.Surf".            *
  *                                                                        */
 
+use Lightwerk\SurfTasks\Tests\Unit\UnitTestCase;
 use TYPO3\Flow\Annotations as Flow;
 use org\bovigo\vfs\vfsStream;
 use Lightwerk\SurfTasks\Service\CommandProviderService;
+use TYPO3\Surf\Domain\Model\Application;
+use TYPO3\Surf\Domain\Model\Deployment;
 
 /**
  * Creates the command for an extbase commando
  *
  * @package Lightwerk\SurfTasks
  */
-class CommandProviderServiceTest extends \TYPO3\Flow\Tests\UnitTestCase
+class CommandProviderServiceTest extends UnitTestCase
 {
 
     /**
@@ -33,11 +36,8 @@ class CommandProviderServiceTest extends \TYPO3\Flow\Tests\UnitTestCase
   }
 }'
         ];
-        vfsStream::setup('root', null, $structure);
-        $rootUrl = vfsStream::url('root');
-        $deployment = $this->createMock('TYPO3\Surf\Domain\Model\Deployment', ['getWorkspacePath'], [], '', false);
-        $deployment->expects($this->once())->method('getWorkspacePath')->will($this->returnValue($rootUrl));
-        $application = new \TYPO3\Surf\Domain\Model\Application('bar');
+        $deployment = $this->getDeploymentForFileStructure($structure);
+        $application = new Application('bar');
         $commandProviderService = $this->getAccessibleMock(CommandProviderService::class, ['foo']);
         $webRoot = $commandProviderService->_call('getWebDir', $deployment, $application);
         $this->assertSame('foo/', $webRoot);
@@ -48,12 +48,8 @@ class CommandProviderServiceTest extends \TYPO3\Flow\Tests\UnitTestCase
      */
     public function getWebDirReturnsEmptyStringIfNoComposerWebDirIsFound()
     {
-        $structure = [];
-        vfsStream::setup('root', null, $structure);
-        $rootUrl = vfsStream::url('root');
-        $deployment = $this->createMock('TYPO3\Surf\Domain\Model\Deployment', ['getWorkspacePath'], [], '', false);
-        $deployment->expects($this->once())->method('getWorkspacePath')->will($this->returnValue($rootUrl));
-        $application = new \TYPO3\Surf\Domain\Model\Application('bar');
+        $deployment = $this->getDeploymentForFileStructure([]);
+        $application = new Application('bar');
         $commandProviderService = $this->getAccessibleMock(CommandProviderService::class, ['foo']);
         $webRoot = $commandProviderService->_call('getWebDir', $deployment, $application);
         $this->assertSame('', $webRoot);
@@ -71,17 +67,26 @@ class CommandProviderServiceTest extends \TYPO3\Flow\Tests\UnitTestCase
                 ]
             ]
         ];
-        vfsStream::setup('root', null, $structure);
-        $rootUrl = vfsStream::url('root');
-
-        $deployment = $this->createMock('TYPO3\Surf\Domain\Model\Deployment', ['getWorkspacePath'], [], '', false);
-        $deployment->expects($this->once())->method('getWorkspacePath')->will($this->returnValue($rootUrl));
-        $application = new \TYPO3\Surf\Domain\Model\Application('bar');
+        $deployment = $this->getDeploymentForFileStructure($structure);
+        $application = new Application('bar');
         $commandProviderService = $this->getAccessibleMock(CommandProviderService::class, ['getWebDir']);
         $commandProviderService->expects($this->once())->method('getWebDir')->will($this->returnValue(''));
-        $reflection = new \ReflectionClass($commandProviderService);
-        $method = $reflection->getMethod('isCoreapiInstalled');
-        $method->setAccessible(true);
+
+        $method = $this->getAccessiblePrivateMethodForObject('isCoreapiInstalled', $commandProviderService);
+
         $this->assertTrue($method->invokeArgs($commandProviderService, [$deployment, $application]));
+    }
+
+    /**
+     * @param array $structure
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    private function getDeploymentForFileStructure(array $structure)
+    {
+        vfsStream::setup('root', null, $structure);
+        $rootUrl = vfsStream::url('root');
+        $deployment = $this->createMock(Deployment::class, ['getWorkspacePath'], [], '', false);
+        $deployment->expects($this->once())->method('getWorkspacePath')->will($this->returnValue($rootUrl));
+        return $deployment;
     }
 }
