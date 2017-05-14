@@ -31,7 +31,7 @@ class CommandProviderService
     /**
      * @var string
      */
-    private $webDir = null;
+    private $webDir = '';
 
     /**
      * @param Deployment $deployment
