@@ -35,7 +35,7 @@ class CommandProviderServiceTest extends \TYPO3\Flow\Tests\UnitTestCase
         ];
         vfsStream::setup('root', null, $structure);
         $rootUrl = vfsStream::url('root');
-        $deployment = $this->getMock('TYPO3\Surf\Domain\Model\Deployment', ['getWorkspacePath'], [], '', false);
+        $deployment = $this->createMock('TYPO3\Surf\Domain\Model\Deployment', ['getWorkspacePath'], [], '', false);
         $deployment->expects($this->once())->method('getWorkspacePath')->will($this->returnValue($rootUrl));
         $application = new \TYPO3\Surf\Domain\Model\Application('bar');
         $commandProviderService = $this->getAccessibleMock(CommandProviderService::class, ['foo']);
@@ -51,11 +51,37 @@ class CommandProviderServiceTest extends \TYPO3\Flow\Tests\UnitTestCase
         $structure = [];
         vfsStream::setup('root', null, $structure);
         $rootUrl = vfsStream::url('root');
-        $deployment = $this->getMock('TYPO3\Surf\Domain\Model\Deployment', ['getWorkspacePath'], [], '', false);
+        $deployment = $this->createMock('TYPO3\Surf\Domain\Model\Deployment', ['getWorkspacePath'], [], '', false);
         $deployment->expects($this->once())->method('getWorkspacePath')->will($this->returnValue($rootUrl));
         $application = new \TYPO3\Surf\Domain\Model\Application('bar');
         $commandProviderService = $this->getAccessibleMock(CommandProviderService::class, ['foo']);
         $webRoot = $commandProviderService->_call('getWebDir', $deployment, $application);
         $this->assertSame('', $webRoot);
+    }
+
+    /**
+     * @test
+     */
+    public function isCoreapiInstalledReturnsTrueIfExtensionDirectoryExist()
+    {
+        $structure = [
+            'typo3conf' => [
+                'ext' => [
+                    'coreapi' => []
+                ]
+            ]
+        ];
+        vfsStream::setup('root', null, $structure);
+        $rootUrl = vfsStream::url('root');
+
+        $deployment = $this->createMock('TYPO3\Surf\Domain\Model\Deployment', ['getWorkspacePath'], [], '', false);
+        $deployment->expects($this->once())->method('getWorkspacePath')->will($this->returnValue($rootUrl));
+        $application = new \TYPO3\Surf\Domain\Model\Application('bar');
+        $commandProviderService = $this->getAccessibleMock(CommandProviderService::class, ['getWebDir']);
+        $commandProviderService->expects($this->once())->method('getWebDir')->will($this->returnValue(''));
+        $reflection = new \ReflectionClass($commandProviderService);
+        $method = $reflection->getMethod('isCoreapiInstalled');
+        $method->setAccessible(true);
+        $this->assertTrue($method->invokeArgs($commandProviderService, [$deployment, $application]));
     }
 }
