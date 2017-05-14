@@ -16,7 +16,6 @@ use TYPO3\Flow\Annotations as Flow;
  */
 class NodeFactoryTest extends UnitTestCase
 {
-
     /**
      * @var NodeFactory
      */
@@ -26,7 +25,6 @@ class NodeFactoryTest extends UnitTestCase
     {
         parent::setUp();
         $this->nodeFactory = new NodeFactory();
-
     }
 
     public function tearDown()
