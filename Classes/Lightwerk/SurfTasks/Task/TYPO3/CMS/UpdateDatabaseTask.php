@@ -46,6 +46,6 @@ class UpdateDatabaseTask extends ExtbaseCommandTask
         //   TABLE_PREFIX
         //   TABLE_DROP
         $actions = !empty($options['updateDatabaseActions']) ? $options['updateDatabaseActions'] : 'field.add, field.change, table.add, table.change';
-        return 'database:updateschema' . escapeshellarg($actions);
+        return 'database:updateschema ' . escapeshellarg($actions);
     }
 }
