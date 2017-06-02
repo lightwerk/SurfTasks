@@ -44,13 +44,15 @@ abstract class ExtbaseCommandTask extends Task
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
-        $commands = $this->buildCommands(
-            $deployment,
-            $application,
-            $options
-        );
-        if (count($commands) > 0) {
+        try {
+            $commands = $this->buildCommands(
+                $deployment,
+                $application,
+                $options
+            );
             $this->shell->executeOrSimulate($commands, $node, $deployment);
+        } catch (CommandProviderException $e) {
+            $deployment->getLogger()->log('Task was skipped! Reason: ' . $e->getMessage(), LOG_WARNING);
         }
     }
 
@@ -81,28 +83,28 @@ abstract class ExtbaseCommandTask extends Task
         $options = []
     ) {
         $commands = [];
-        try {
-            switch ($this->commandProviderService->getDetectedCommandProvider($deployment, $application)) {
-                case 'coreapi':
-                    $command = $this->buildCoreapiCommand($deployment, $application, $options);
-                    break;
-                case 'typo3-console':
-                    $command = $this->buildTypo3ConsoleCommand($options);
-                    break;
-                default:
-                    throw new CommandProviderException('No command was build for the detected command provider.' . 1494672441);
-            }
-
-            if ($command !== '') {
-                $commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-                if (!empty($options['context'])) {
-                    $commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
-                }
-                $commands[] = $command;
-            }
-        } catch (CommandProviderException $e) {
-            // no command provider detected, continue
+        $command = '';
+        $commandProvider = $this->commandProviderService->getDetectedCommandProvider($deployment, $application);
+        switch ($commandProvider) {
+            case 'coreapi':
+                $command = $this->buildCoreapiCommand($deployment, $application, $options);
+                break;
+            case 'typo3-console':
+                $command = $this->buildTypo3ConsoleCommand($options);
+                break;
+            default:
+                // Do nothing
         }
+
+        if ($command === '') {
+            throw new CommandProviderException('The used Provider (' . $commandProvider . ') has no implementation for this task.', 1494672441);
+        }
+
+        $commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
+        if (!empty($options['context'])) {
+            $commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
+        }
+        $commands[] = $command;
 
         return $commands;
     }

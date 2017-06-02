@@ -37,6 +37,7 @@ class CommandProviderService
      * @param Deployment $deployment
      * @param Application $application
      * @return string
+     * @throws CommandProviderException
      */
     public function getDetectedCommandProvider(Deployment $deployment, Application $application): string
     {
@@ -63,7 +64,7 @@ class CommandProviderService
             return $this->detectedCommandProvider;
         }
 
-        throw new CommandProviderException('No command provider found.', 1494672440);
+        throw new CommandProviderException('No command provider (coreapi, typo3_console) was found.', 1494672440);
     }
 
     /**
