@@ -18,10 +18,14 @@ use TYPO3\Surf\Domain\Model\Deployment;
  */
 class CommandProviderService
 {
+
+    const COMMAND_PROVIDER_COREAPI = 'coreapi';
+    const COMMAND_PROVIDER_TYPO3_CONSOLE = 'typo3-console';
+
     /**
      * @var array
      */
-    private $supportedCommandProvider = ['coreapi', 'typo3-console'];
+    private $supportedCommandProvider = [self::COMMAND_PROVIDER_COREAPI, self::COMMAND_PROVIDER_TYPO3_CONSOLE];
 
     /**
      * @var string
@@ -37,6 +41,7 @@ class CommandProviderService
      * @param Deployment $deployment
      * @param Application $application
      * @return string
+     * @throws CommandProviderException
      */
     public function getDetectedCommandProvider(Deployment $deployment, Application $application): string
     {
@@ -63,7 +68,7 @@ class CommandProviderService
             return $this->detectedCommandProvider;
         }
 
-        throw new CommandProviderException('No command provider found.', 1494672440);
+        throw new CommandProviderException('No command provider (coreapi, typo3_console) was found.', 1494672440);
     }
 
     /**
@@ -99,9 +104,9 @@ class CommandProviderService
     private function hasCommandProvider(string $commandProvider, Deployment $deployment, Application $application): bool
     {
         switch ($commandProvider) {
-            case 'coreapi':
+            case self::COMMAND_PROVIDER_COREAPI:
                 return $this->isCoreapiInstalled($deployment, $application);
-            case 'typo3-console':
+            case self::COMMAND_PROVIDER_TYPO3_CONSOLE:
                 return $this->isTypo3ConsolePresent($deployment, $application);
         }
         return false;
