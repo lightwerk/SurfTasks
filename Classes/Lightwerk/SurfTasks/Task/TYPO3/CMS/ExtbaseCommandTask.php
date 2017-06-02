@@ -81,23 +81,27 @@ abstract class ExtbaseCommandTask extends Task
         $options = []
     ) {
         $commands = [];
-        switch ($this->commandProviderService->getDetectedCommandProvider($deployment, $application)) {
-            case 'coreapi':
-                $command = $this->buildCoreapiCommand($deployment, $application, $options);
-                break;
-            case 'typo3-console':
-                $command = $this->buildTypo3ConsoleCommand($options);
-                break;
-            default:
-                throw new CommandProviderException('No command was build for the detected command provider.' . 1494672441);
-        }
-
-        if ($command !== '') {
-            $commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
-            if (!empty($options['context'])) {
-                $commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
+        try {
+            switch ($this->commandProviderService->getDetectedCommandProvider($deployment, $application)) {
+                case 'coreapi':
+                    $command = $this->buildCoreapiCommand($deployment, $application, $options);
+                    break;
+                case 'typo3-console':
+                    $command = $this->buildTypo3ConsoleCommand($options);
+                    break;
+                default:
+                    throw new CommandProviderException('No command was build for the detected command provider.' . 1494672441);
             }
-            $commands[] = $command;
+
+            if ($command !== '') {
+                $commands[] = 'cd ' . escapeshellarg($deployment->getApplicationReleasePath($application));
+                if (!empty($options['context'])) {
+                    $commands[] = 'export TYPO3_CONTEXT=' . escapeshellarg($options['context']);
+                }
+                $commands[] = $command;
+            }
+        } catch (CommandProviderException $e) {
+            // no command provider detected, continue
         }
 
         return $commands;
