@@ -86,10 +86,10 @@ abstract class ExtbaseCommandTask extends Task
         $command = '';
         $commandProvider = $this->commandProviderService->getDetectedCommandProvider($deployment, $application);
         switch ($commandProvider) {
-            case 'coreapi':
+            case CommandProviderService::COMMAND_PROVIDER_COREAPI:
                 $command = $this->buildCoreapiCommand($deployment, $application, $options);
                 break;
-            case 'typo3-console':
+            case CommandProviderService::COMMAND_PROVIDER_TYPO3_CONSOLE:
                 $command = $this->buildTypo3ConsoleCommand($options);
                 break;
             default:
