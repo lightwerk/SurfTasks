@@ -11,6 +11,7 @@ use TYPO3\Surf\Domain\Model\Application;
 use TYPO3\Surf\Domain\Model\Deployment;
 use TYPO3\Surf\Domain\Model\Node;
 use TYPO3\Surf\Domain\Model\Task;
+use TYPO3\Surf\Exception\InvalidConfigurationException;
 use TYPO3\Surf\Exception\TaskExecutionException;
 
 /**
@@ -46,7 +47,7 @@ class NpmTask extends Task
      * @param Deployment  $deployment
      * @param array       $options
      *
-     * @throws TaskExecutionException
+     * @throws InvalidConfigurationException
      */
     public function execute(Node $node, Application $application, Deployment $deployment, array $options = [])
     {
@@ -71,8 +72,11 @@ class NpmTask extends Task
 
         $commands = [];
         $commands[] = 'cd '.escapeshellarg($rootPath);
-        $commands[] = 'if [ "`which npm`" != "" ] && [ -f "package.json" ]; then '.
+        $commands[] = 'if [ "`which npm`" != "" ] && [ -f "package.json" ] && [ ! -f "yarn.lock" ]; then '.
             'npm install --loglevel error; '.
+            'fi';
+        $commands[] = 'if [ "`which yarn`" != "" ] && [ -f "yarn.lock" ]; then '.
+            'yarn install --production --non-interactive --ignore-engines; '.
             'fi';
 
         $this->shell->executeOrSimulate($commands, $node, $deployment);
