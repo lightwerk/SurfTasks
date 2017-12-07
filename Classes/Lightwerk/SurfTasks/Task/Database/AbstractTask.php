@@ -103,14 +103,7 @@ abstract class AbstractTask extends ExtbaseCommandTask
         }
 
         $returnedOutput = $this->shell->execute($commands, $node, $deployment, false, false);
-        switch ($this->commandProviderService->getDetectedCommandProvider($deployment, $application)) {
-            case 'coreapi':
-                $returnedOutput = json_decode($returnedOutput, true);
-                break;
-            case 'typo3-console':
-                $returnedOutput = $returnedOutput[0];
-                break;
-        }
+        $returnedOutput = json_decode($returnedOutput, true);
 
         if (empty($returnedOutput)) {
             throw new TaskExecutionException('Could not receive database credentials', 1409252546);
@@ -199,6 +192,6 @@ abstract class AbstractTask extends ExtbaseCommandTask
      */
     protected function getTypo3ConsoleArguments(array $options)
     {
-        return 'configuration:showactive DB';
+        return 'configuration:showactive DB --json';
     }
 }
